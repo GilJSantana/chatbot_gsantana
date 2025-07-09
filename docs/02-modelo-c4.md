@@ -6,18 +6,7 @@ Este documento apresenta a arquitetura do chatbot do Lab-Yes utilizando o Modelo
 
 O diagrama de contexto mostra o sistema que estamos construindo (o Chatbot do Lab-Yes) e como ele se encaixa em seu ambiente, identificando os usuários e os sistemas externos com os quais interage.
 
-C4Context
-    title Diagrama de Contexto para o Chatbot Lab-Yes
-
-    Person(visitor, "Visitante do Site Lab-Yes", "Interage com o site e o chatbot.")
-    System_Ext(lab_yes_site, "Site do Lab-Yes", "Website oficial do Lab-Yes.")
-    System(chatbot_lab_yes, "Chatbot do Lab-Yes", "Sistema de chatbot de FAQ para o Lab-Yes.")
-    Person(administrator, "Administrador Lab-Yes", "Gerencia as FAQs do chatbot e o site.")
-
-    Rel(visitor, lab_yes_site, "Usa")
-    Rel(visitor, chatbot_lab_yes, "Interage com (via interface no site)")
-    Rel(chatbot_lab_yes, lab_yes_site, "É incorporado em")
-    Rel(administrator, chatbot_lab_yes, "Gerencia (adiciona/edita FAQs via API)", "HTTPS")
+* **Objetivo:** Fornecer uma visão geral de alto nível do sistema, seus usuários e sistemas externos.
 * **Elementos:**
     * **Pessoas:**
         * `Visitante do Site Lab-Yes`: Usuário principal que interage com o chatbot.
@@ -32,6 +21,7 @@ C4Context
     * `Chatbot do Lab-Yes` **é incorporado em** `Site do Lab-Yes`.
     * `Administrador do Lab-Yes` **gerencia** `Chatbot do Lab-Yes` (adiciona/edita FAQs).
 
+  ![Diagrama de Contexto do Sistema](images/context.png)
 
 ## 2. Nível 2: Diagrama de Contêineres (Container Diagram)
 
@@ -49,25 +39,11 @@ O diagrama de contêineres mostra a arquitetura de alto nível do sistema, divid
     * `Navegador do Visitante` **envia requisições HTTP (API)** para `API do Chatbot (Flask)`.
     * `API do Chatbot (Flask)` **lê/escreve dados** no `Banco de Dados FAQ (SQLite)`.
     * `Administrador do Lab-Yes` **gerencia (via API)** `API do Chatbot (Flask)`.
+  
 
-C4Container
-    title Diagrama de Contêineres para o Chatbot Lab-Yes
 
-    Person(visitor, "Visitante do Site Lab-Yes")
-    System_Ext(lab_yes_site, "Site do Lab-Yes")
-    Person(administrator, "Administrador Lab-Yes")
 
-    Container_Boundary(chatbot_boundary, "Chatbot do Lab-Yes") {
-        Container(browser_app, "Aplicação Frontend (Navegador)", "JavaScript, HTML, CSS", "Interface do usuário do chatbot que roda no navegador do visitante.")
-        Container(chatbot_api, "API do Chatbot (Flask)", "Python, Flask, Gunicorn", "Serviço RESTful que processa mensagens e fornece respostas de FAQ.")
-        ContainerDb(faq_database, "Banco de Dados FAQ (SQLite)", "SQLite", "Armazena perguntas frequentes e suas respostas.")
-    }
-
-    Rel(visitor, browser_app, "Usa", "HTTPS")
-    Rel(browser_app, chatbot_api, "Faz requisições API", "HTTPS/HTTP (durante desenvolvimento)")
-    Rel(chatbot_api, faq_database, "Lê/Escreve dados")
-    Rel(administrator, chatbot_api, "Gerencia FAQs (via API)", "HTTPS")
-    Rel(browser_app, lab_yes_site, "É incorporado em")
+![Diagrama de Contêineres](images/container.png)
 
 ## 3. Nível 3: Diagrama de Componentes (Component Diagram - para a API do Chatbot)
 
