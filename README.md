@@ -93,3 +93,35 @@ Para executar os testes automatizados do projeto:
 poetry run pytest # Exemplo para pytest
 # ou
 poetry run python -m unittest discover # Exemplo para unittest
+```
+*Lembre-se de adicionar suas dependências de teste (ex: pytest) como dev-dependencies no seu `pyproject.toml` usando `poetry add --group dev pytest`.*
+
+## 📄 Documentação Adicional
+
+* [Decisões de Arquitetura](docs/03-arquitetura.md)
+* [Processo de Design (UX/UI)](docs/01-design.md)
+* [Considerações de Segurança](docs/04-seguranca.md)
+* [Plano de Implantação](docs/05-deploy.md)
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
+
+1.  Faça um fork do projeto.
+2.  Crie uma nova branch para sua funcionalidade ou correção (`git checkout -b feature/minha-nova-feature`).
+3.  Faça suas alterações e adicione (`git add .`) e commite-as (`git commit -m 'feat: Adiciona nova funcionalidade X'`).
+4.  Envie suas alterações para a nova branch (`git push origin feature/minha-nova-feature`).
+5.  Abra um Pull Request no repositório original.
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 📞 Contato
+
+* **Linkedin:** [Gilmar](https://www.linkedin.com/in/gilmarjs/)
+* **Lab-Yes:** [https://lab-yes.com](https://lab-yes.com)
+
+---
