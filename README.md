@@ -1,4 +1,4 @@
-# 🚀 Chatbot Lab-Yes
+# 🚀 Chatbot Lab Yes!
 
 Este é o repositório principal do projeto **Chatbot Lab-Yes**, um sistema de perguntas e respostas frequentes (FAQ) desenvolvido para auxiliar os visitantes do site do Lab-Yes. O projeto é construído com foco em uma arquitetura robusta e escalável, utilizando tecnologias modernas e as melhores práticas de desenvolvimento.
 
