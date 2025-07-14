@@ -20,8 +20,7 @@ O diagrama de contexto mostra o sistema que estamos construindo (o Chatbot do La
     * `Visitante do Site Lab-Yes` **interage com** `Chatbot do Lab-Yes` (via interface no site).
     * `Chatbot do Lab-Yes` **é incorporado em** `Site do Lab-Yes`.
     * `Administrador do Lab-Yes` **gerencia** `Chatbot do Lab-Yes` (adiciona/edita FAQs).
-
-  ![Diagrama de Contexto do Sistema](images/context.png)
+       ![Diagrama de Contexto do Sistema](images/context.png)
 
 ## 2. Nível 2: Diagrama de Contêineres (Container Diagram)
 
@@ -38,12 +37,8 @@ O diagrama de contêineres mostra a arquitetura de alto nível do sistema, divid
     * `Visitante do Site Lab-Yes` **usa** `Navegador do Visitante`.
     * `Navegador do Visitante` **envia requisições HTTP (API)** para `API do Chatbot (Flask)`.
     * `API do Chatbot (Flask)` **lê/escreve dados** no `Banco de Dados FAQ (SQLite)`.
-    * `Administrador do Lab-Yes` **gerencia (via API)** `API do Chatbot (Flask)`.
-  
-
-
-
-![Diagrama de Contêineres](images/container.png)
+      * `Administrador do Lab-Yes` **gerencia (via API)** `API do Chatbot (Flask)`.
+        ![Diagrama de Contêineres](images/container.png)
 
 ## 3. Nível 3: Diagrama de Componentes (Component Diagram - para a API do Chatbot)
 
@@ -69,31 +64,5 @@ Este nível foca em uma única caixa do diagrama de contêineres (a `API do Chat
     * `Repositório FAQ` **interage com** `Banco de Dados FAQ (SQLite)`.
     * Todos os componentes **escrevem logs** no `Módulo de Logging`.
 
-C4Component
-    title Diagrama de Componentes para a API do Chatbot (Flask)
+      ![Diagrama de componentes](images/diagrama.png)
 
-    Container(browser_app, "Aplicação Frontend (Navegador)", "JavaScript")
-    ContainerDb(faq_database, "Banco de Dados FAQ (SQLite)")
-    Person(administrator, "Administrador Lab-Yes")
-
-    Component_Boundary(api_boundary, "API do Chatbot (Flask)") {
-        Component(http_server, "Servidor HTTP (Gunicorn/Flask)", "Python", "Recebe e roteia as requisições HTTP.")
-        Component(routes_module, "Módulo de Rotas API", "Python", "Define os endpoints da API (e.g., /chat, /add_faq).")
-        Component(faq_service, "Serviço de FAQ (FAQService)", "Python", "Lógica de negócio para busca e processamento de FAQs.")
-        Component(faq_repository, "Repositório FAQ (FAQRepository)", "Python, SQLAlchemy", "Abstrai a interação com o banco de dados para FAQs.")
-        Component(input_validator, "Validador de Entrada", "Python", "Valida os dados de entrada das requisições (e.g., JSON payload).")
-        Component(logger_component, "Componente de Logging", "Python", "Gerencia o registro de eventos e erros.")
-    }
-
-    Rel(browser_app, http_server, "Envia Requisições", "HTTP/HTTPS")
-    Rel(administrator, routes_module, "Chama endpoints de administração", "HTTP/HTTPS")
-
-    Rel(http_server, routes_module, "Roteia requisições")
-    Rel(routes_module, input_validator, "Utiliza para validar entrada")
-    Rel(routes_module, faq_service, "Chama lógica de negócio")
-    Rel(faq_service, faq_repository, "Utiliza para acesso a dados")
-    Rel(faq_repository, faq_database, "Lê/Escreve dados")
-
-    Rel_U(http_server, logger_component, "Escreve logs")
-    Rel_U(routes_module, logger_component, "Escreve logs")
-    Rel_U(faq_service, logger_component, "Escreve logs")
