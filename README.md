@@ -1,10 +1,10 @@
-# 🚀 Chatbot Lab Yes!
+# 🚀 Chatbot Gsantana!
 
-Este é o repositório principal do projeto **Chatbot Lab Yes!**, um sistema de perguntas e respostas frequentes (FAQ) desenvolvido para auxiliar os visitantes do site do Lab Yes!. O projeto é construído com foco em uma arquitetura robusta e escalável, utilizando tecnologias modernas e as melhores práticas de desenvolvimento.
+Este é o repositório principal do projeto **Chatbot Gjsantana**, um sistema de perguntas e respostas frequentes (FAQ) desenvolvido para auxiliar os visitantes do site do Lab Yes!. O projeto é construído com foco em uma arquitetura robusta e escalável, utilizando tecnologias modernas e as melhores práticas de desenvolvimento.
 
 ## ✨ Visão Geral
 
-O Chatbot Lab Yes! visa aprimorar a experiência do usuário no site do Lab Yes!, fornecendo respostas rápidas e automatizadas para dúvidas comuns. Ele é projetado como uma API RESTful em Python (Flask) com um frontend leve em JavaScript que pode ser facilmente integrado a qualquer página web.
+O Chatbot Gsantana visa aprimorar a experiência do usuário no site do Lab Yes!, fornecendo respostas rápidas e automatizadas para dúvidas comuns. Ele é projetado como uma API RESTful em Python (Flask) com um frontend leve em JavaScript que pode ser facilmente integrado a qualquer página web.
 
 ## 📐 Arquitetura
 
