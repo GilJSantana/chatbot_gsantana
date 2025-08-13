@@ -50,8 +50,8 @@ Certifique-se de ter instalado:
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/seu-usuario/chatbot_lab_yes.git](https://github.com/seu-usuario/chatbot_lab_yes.git)
-    cd chatbot_lab_yes
+    git clone [https://github.com/GilJSantana/chatbot_gsantana.git](https://github.com/GilJSantana/chatbot_gsantana.git)
+    cd chatbot_gsantana
     ```
 
 2.  **Instale as dependências usando Poetry:**
@@ -113,11 +113,6 @@ Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
 4.  Envie suas alterações para a nova branch (`git push origin feature/minha-nova-feature`).
 5.  Abra um Pull Request no repositório original.
 
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
 
 ## 📞 Contato
 
