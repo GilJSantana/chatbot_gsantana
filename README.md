@@ -98,10 +98,13 @@ poetry run python -m unittest discover # Exemplo para unittest
 
 ## 📄 Documentação Adicional
 
+* [Especificação](docs/01-especificacao.md)
+* [C4](docs/02-modelo-c4.md)
 * [Decisões de Arquitetura](docs/03-arquitetura.md)
-* [Processo de Design (UX/UI)](docs/01-design.md)
 * [Considerações de Segurança](docs/04-seguranca.md)
-* [Plano de Implantação](docs/05-deploy.md)
+* [Processo de Design (UX/UI)](docs/05-design.md)
+* [Plano de Implantação](docs/06-deploy.md)
+* [Guia de Uso](docs/07-guias-de-uso.md)
 
 ## 🤝 Contribuição
 
@@ -117,6 +120,6 @@ Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
 ## 📞 Contato
 
 * **Linkedin:** [Gilmar](https://www.linkedin.com/in/gilmarjs/)
-* **Lab Yes!:** [https://Lab Yes!.com](https://Lab Yes!.com)
+* **Lab Yes!:** [https://Lab Yes!.com](https://lab-yes.com)
 
 ---
