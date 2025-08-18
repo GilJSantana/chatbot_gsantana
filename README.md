@@ -39,10 +39,13 @@ Certifique-se de ter instalado:
     Para instalar o Poetry, use o comando recomendado para seu sistema operacional (geralmente):
     ```bash
     # No macOS / Linux / WSL
-    curl -sSL [https://install.python-poetry.org](https://install.python-poetry.org) | python3 -
+    curl -sSL https://install.python-poetry.org | python3 -
+    export PATH="$HOME/.local/bin:$PATH"
+    
+  Adicione a linha acima no seu arquivo .bashrc ou zshrc 
 
     # No Windows (PowerShell)
-    (Invoke-WebRequest -Uri [https://install.python-poetry.org](https://install.python-poetry.org) -UseBasicParsing).Content | python -
+    (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
     ```
     Após a instalação, certifique-se de que o Poetry esteja no seu PATH.
 
