@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Serviço para a API (Backend)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gsantana_api
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mapeia a pasta backend para permitir hot-reloading durante o desenvolvimento
+      - ./backend:/app/backend
+      # Mapeia um volume para persistir o banco de dados SQLite
+      - gsantana_db:/app/database
+    command: gunicorn --workers 4 --bind 0.0.0.0:5000 backend.app:app
+    env_file:
+      - .env
+
+  # Serviço para o Frontend (HTML, CSS, JS)
+  frontend:
+    image: nginx:alpine
+    container_name: gsantana_frontend
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      # Mapeia a pasta de arquivos estáticos do frontend
+      - ./frontend:/usr/share/nginx/html
+      # Mapeia o arquivo de configuração do Nginx para configurar o proxy
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+  # Define o volume nomeado para persistir o banco de dados
+  gsantana_db:
