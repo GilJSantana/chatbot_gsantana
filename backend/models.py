@@ -1,10 +1,10 @@
-from backend.app import db
+from backend.database import db
 
 class FAQ(db.Model):
     __tablename__= 'faq'
-    id = db.Columm(db.Integer, primary_key=True)
-    question = db.Columm(db.String(255),nullable=False)
-    answer = db.Columm(db.Text, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255),nullable=False)
+    answer = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
         return f'<FAQ {self.id} - "{self.question[:30]}...">'
