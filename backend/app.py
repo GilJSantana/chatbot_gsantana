@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from backend.database import db
-
+from backend.routes import faq_bp
 
 
 def create_app():
@@ -14,10 +14,12 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    app.register_blueprint(faq_bp)
     @app.route('/')
     def index():
         return 'API do Chatbot Gsantana está online'
     return app
+
 if __name__=='__main__':
     app = create_app()
     app.run(host='0.0.0.0',port=5000)

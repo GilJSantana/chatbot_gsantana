@@ -11,7 +11,7 @@ from backend.services.faq_service import FAQServices
 from backend.repositories.faq_repository import FAQRepository
 from backend.app import db
 
-faq_bp = Blueprint('faq_bp', __name__, url_prefix='api/faq')
+faq_bp = Blueprint('faq_bp', __name__, url_prefix='/api/faq')
 
 faq_repository = FAQRepository()
 faq_service = FAQServices(faq_repository)
