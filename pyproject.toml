@@ -11,7 +11,11 @@ dependencies = [
     "flask (>=3.1.1,<4.0.0)",
     "requests (>=2.32.4,<3.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
-    "nltk (>=3.9.1,<4.0.0)"
+    "nltk (>=3.9.1,<4.0.0)",
+    "sqlalchemy (>=2.0.43,<3.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+    "flask-sqlalchemy (>=3.1.1,<4.0.0)",
+    "flask-cors (==5.0.0)"
 ]
 
 [tool.poetry]
@@ -22,6 +26,7 @@ black = "^25.1.0"
 isort = "^6.0.1"
 flake8 = "^7.3.0"
 pre-commit = "^4.3.0"
+pytest-mock = "^3.14.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
