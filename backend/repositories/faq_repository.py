@@ -1,6 +1,7 @@
-from backend.app import db
+from backend.database import db
 from backend.models import FAQ
 from sqlalchemy import or_
+
 
 class FAQRepository:
     def get_all_faqs(self):
@@ -9,7 +10,7 @@ class FAQRepository:
     def get_faq_by_id(self, faq_id):
         return FAQ.query.get(faq_id)
 
-    def search_faqs(self, query:str):
+    def search_faqs(self, query: str):
         search_term = f'%{query.lower()}%'
         return FAQ.query.filter(
             or_(
@@ -19,7 +20,7 @@ class FAQRepository:
         ).all()
 
     def add_faq(self, question, answer):
-        new_faq = FAQ(question=question,answer=answer)
+        new_faq = FAQ(question=question, answer=answer)
         db.session.add(new_faq)
         db.session.commit()
         return new_faq
