@@ -8,14 +8,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "flask (>=3.1.1,<4.0.0)",
+    "fastapi (>=0.111.0,<0.112.0)",
+    "uvicorn[standard] (>=0.30.1,<0.31.0)",
+    "pydantic-settings (>=2.4.0,<3.0.0)",
+    "python-multipart (>=0.0.9,<0.0.10)",
     "requests (>=2.32.4,<3.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
     "nltk (>=3.9.1,<4.0.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
-    "flask-sqlalchemy (>=3.1.1,<4.0.0)",
-    "flask-cors (==5.0.0)"
 ]
 
 [tool.poetry]
