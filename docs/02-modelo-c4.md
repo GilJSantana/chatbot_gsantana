@@ -30,39 +30,41 @@ O diagrama de contêineres mostra a arquitetura de alto nível do sistema, divid
     * `Visitante do Site Lab-Yes`: (Pessoa)
     * `Site do Lab-Yes`: (Sistema)
     * `Navegador do Visitante`: (Contêiner - Aplicação Frontend) - O navegador web que executa o JavaScript do chatbot.
-    * `API do Chatbot (Flask)`: (Contêiner - Aplicação Backend) - Serviço Python/Flask que processa as mensagens e busca as respostas.
-    * `Banco de Dados FAQ (SQLite)`: (Contêiner - Banco de Dados) - Armazena as perguntas e respostas frequentes.
+    * `API do Chatbot (FastAPI)`: (Contêiner - Aplicação Backend) - Serviço Python/FastAPI que processa as mensagens e busca as respostas.
+    * `Banco de Dados FAQ (SQLite/PostgreSQL)`: (Contêiner - Banco de Dados) - Armazena as perguntas e respostas frequentes.
 
 * **Interações:**
     * `Visitante do Site Lab-Yes` **usa** `Navegador do Visitante`.
-    * `Navegador do Visitante` **envia requisições HTTP (API)** para `API do Chatbot (Flask)`.
-    * `API do Chatbot (Flask)` **lê/escreve dados** no `Banco de Dados FAQ (SQLite)`.
-      * `Administrador do Lab-Yes` **gerencia (via API)** `API do Chatbot (Flask)`.
+    * `Navegador do Visitante` **envia requisições HTTP (API)** para `API do Chatbot (FastAPI)`.
+    * `API do Chatbot (FastAPI)` **lê/escreve dados** no `Banco de Dados FAQ`.
+      * `Administrador do Lab-Yes` **gerencia (via API)** `API do Chatbot (FastAPI)`.
         ![Diagrama de Contêineres](images/container.png)
+        *(Nota: O diagrama usa Flask como exemplo, mas a implementação atual utiliza FastAPI).*
 
 ## 3. Nível 3: Diagrama de Componentes (Component Diagram - para a API do Chatbot)
 
-Este nível foca em uma única caixa do diagrama de contêineres (a `API do Chatbot (Flask)`) e a decompõe em seus principais componentes internos.
+Este nível foca em uma única caixa do diagrama de contêineres (a `API do Chatbot (FastAPI)`) e a decompõe em seus principais componentes internos.
 
-* **Elementos (dentro da API do Chatbot - Flask):**
+* **Elementos (dentro da API do Chatbot - FastAPI):**
     * `Visitante do Site Lab-Yes`: (Pessoa)
     * `Navegador do Visitante`: (Contêiner)
-    * `Servidor Web Gunicorn/Flask`: (Componente) - O ponto de entrada que lida com as requisições HTTP.
-    * `Módulo de Rotas API`: (Componente) - Define os endpoints HTTP (ex: `/chat`, `/add_faq`).
+    * `Servidor Web ASGI (Uvicorn)`: (Componente) - O ponto de entrada que lida com as requisições HTTP.
+    * `Módulo de Rotas API (Routers)`: (Componente) - Define os endpoints HTTP (ex: `/chat`, `/add_faq`) usando os decoradores do FastAPI.
     * `Serviço de FAQ (FAQService)`: (Componente) - Encapsula a lógica de negócio para buscar e processar FAQs.
     * `Repositório FAQ (FAQRepository)`: (Componente) - Abstrai a interação direta com o banco de dados (usando SQLAlchemy).
-    * `Módulo de Validação de Entrada`: (Componente) - Garante que as requisições da API são válidas.
+    * `Módulo de Validação (Pydantic)`: (Componente) - Garante que as requisições da API e os dados de resposta sigam um schema definido.
     * `Módulo de Logging`: (Componente) - Registra eventos e erros.
-    * `Banco de Dados FAQ (SQLite)`: (Contêiner externo a este detalhe, mas interage com).
+    * `Banco de Dados FAQ`: (Contêiner externo a este detalhe, mas interage com).
 
 * **Interações:**
-    * `Navegador do Visitante` **envia requisição HTTP** para `Servidor Web Gunicorn/Flask`.
-    * `Servidor Web Gunicorn/Flask` **direciona** para `Módulo de Rotas API`.
-    * `Módulo de Rotas API` **utiliza** `Módulo de Validação de Entrada`.
+    * `Navegador do Visitante` **envia requisição HTTP** para `Servidor Web ASGI (Uvicorn)`.
+    * `Servidor Web ASGI (Uvicorn)` **direciona** para `Módulo de Rotas API`.
+    * `Módulo de Rotas API` **utiliza** `Módulo de Validação (Pydantic)` para validar os dados da requisição.
     * `Módulo de Rotas API` **chama** `Serviço de FAQ`.
     * `Serviço de FAQ` **utiliza** `Repositório FAQ`.
-    * `Repositório FAQ` **interage com** `Banco de Dados FAQ (SQLite)`.
+    * `Repositório FAQ` **interage com** `Banco de Dados FAQ`.
     * Todos os componentes **escrevem logs** no `Módulo de Logging`.
 
       ![Diagrama de componentes](images/diagrama.png)
+      *(Nota: O diagrama usa Flask como exemplo, mas a implementação atual utiliza FastAPI e Uvicorn).*
 

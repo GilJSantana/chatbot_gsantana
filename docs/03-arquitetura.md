@@ -15,7 +15,7 @@ O projeto Chatbot Lab-Yes foi guiado pelos seguintes princípios de design:
 
 ## 2. Visão Geral da Arquitetura
 
-O Chatbot Lab-Yes segue uma arquitetura baseada em **microsserviços para a API principal**, complementada por um frontend desacoplado. A comunicação é majoritariamente RESTful.
+O Chatbot Lab-Yes segue uma arquitetura de microsserviço para a API principal, complementada por um frontend desacoplado. A comunicação é RESTful.
 
 * **Backend (API do Chatbot):** Responsável pela lógica de negócio principal, gerenciamento de FAQs e integração com o banco de dados.
 * **Frontend (Aplicação no Navegador):** Interface do usuário que interage com a API e exibe as respostas do chatbot.
@@ -23,65 +23,57 @@ O Chatbot Lab-Yes segue uma arquitetura baseada em **microsserviços para a API 
 
 ## 3. Decisões Tecnológicas Chave
 
-### 3.1. Linguagem e Framework do Backend: Python com Flask
+### 3.1. Linguagem e Framework do Backend: Python com FastAPI
 
 * **Porquê Python:**
     * **Produtividade:** Sintaxe clara e vasta gama de bibliotecas.
-    * **Comunidade:** Grande comunidade e ecossistema robusto.
-    * **Facilidade de Prototipagem e Desenvolvimento Rápido:** Ideal para a fase inicial do projeto.
-* **Porquê Flask:**
-    * **Micro-framework:** Leve e flexível, permitindo construir apenas o que é necessário.
-    * **Controle Total:** Dá ao desenvolvedor mais controle sobre a escolha de bibliotecas e componentes.
-    * **Desempenho (com Gunicorn):** Embora seja um micro-framework, combinado com Gunicorn (servidor WSGI), oferece bom desempenho e concorrência para casos de uso de APIs.
+    * **Comunidade:** Grande comunidade e ecossistema robusto para IA, processamento de dados e web.
+* **Porquê FastAPI:**
+    * **Alta Performance:** Sendo um dos frameworks Python mais rápidos disponíveis, o FastAPI nos ajuda a cumprir o requisito de tempo de resposta (RNF1.1) de forma mais eficaz que alternativas como o Flask.
+    * **Validação de Dados Nativa:** Utiliza Pydantic para validar automaticamente os dados de entrada e saída, o que reduz a quantidade de código boilerplate e aumenta a segurança e a robustez da API.
+    * **Documentação Automática:** Gera documentação interativa da API (Swagger UI e ReDoc) automaticamente a partir do código, garantindo que a documentação esteja sempre atualizada e facilitando os testes.
+    * **Moderno e Assíncrono:** Construído sobre ASGI (Asynchronous Server Gateway Interface), o que o torna ideal para aplicações com alta concorrência e operações de I/O, como chamadas a bancos de dados e outras APIs.
 
 ### 3.2. Gerenciamento de Dependências: Poetry
 
 * **Porquê Poetry:**
     * **Gerenciamento de Dependências Determinístico:** Garante que builds sejam reproduzíveis.
     * **Ambientes Virtuais Integrados:** Facilita a criação e gerenciamento de ambientes isolados.
-    * **Publicação de Pacotes:** Prepara o terreno caso a API precise ser empacotada.
     * **Ferramenta All-in-One:** Simplifica o fluxo de trabalho de desenvolvimento.
 
-### 3.3. Banco de Dados: SQLite
+### 3.3. Banco de Dados: SQLite (Inicial) e PostgreSQL (Produção)
 
-* **Porquê SQLite:**
-    * **Simplicidade:** Banco de dados em arquivo único, ideal para aplicações menores e prototipagem.
-    * **Facilidade de Setup:** Não requer um servidor de banco de dados separado, o que simplifica o ambiente de desenvolvimento.
-    * **Portabilidade:** O arquivo do banco de dados pode ser facilmente movido.
-    * **Escalabilidade Futura:** Entende-se que para maior escalabilidade e concorrência, uma solução como PostgreSQL ou MySQL seria mais adequada, mas para a necessidade atual, o SQLite é suficiente.
+* **Porquê SQLite (para desenvolvimento):**
+    * **Simplicidade:** Banco de dados em arquivo único, ideal para prototipagem e testes locais.
+    * **Facilidade de Setup:** Não requer um servidor de banco de dados separado.
+* **Porquê PostgreSQL (para produção):**
+    * **Robustez e Escalabilidade:** Um sistema de banco de dados relacional completo, capaz de lidar com um volume maior de dados e acessos concorrentes.
+    * **Recursos Avançados:** Suporte a tipos de dados complexos, transações e confiabilidade, essencial para um ambiente de produção.
 
-### 3.4. Servidor WSGI: Gunicorn
+### 3.4. Servidor ASGI: Uvicorn
 
-* **Porquê Gunicorn:**
-    * **Servidor Python Robusto:** Amplamente utilizado em produção para servir aplicações WSGI (como Flask).
-    * **Concorrência:** Gerencia múltiplos workers, permitindo que a API lide com várias requisições simultaneamente de forma eficiente.
-    * **Simplicidade de Configuração:** Fácil de integrar e configurar com aplicações Flask.
+* **Porquê Uvicorn:**
+    * **Servidor ASGI de Alta Performance:** É o servidor recomendado para aplicações FastAPI, construído para lidar com a natureza assíncrona do framework.
+    * **Leve e Rápido:** Garante que a aplicação seja servida com o mínimo de sobrecarga.
 
 ### 3.5. Frontend: JavaScript/HTML/CSS
 
 * **Porquê Web Technologies Puras:**
-    * **Flexibilidade e Leveza:** Permite criar uma interface minimalista e customizável sem a sobrecarga de grandes frameworks (como React, Angular, Vue) para este caso de uso simples.
-    * **Fácil Integração:** A interface pode ser incorporada em qualquer página web existente com poucas linhas de código.
-    * **Foco na Interação via API:** Reforça a natureza da API como o core do sistema.
+    * **Flexibilidade e Leveza:** Permite criar uma interface minimalista sem a sobrecarga de grandes frameworks.
+    * **Fácil Integração:** A interface pode ser incorporada em qualquer página web existente.
 
 ## 4. Padrões de Design Aplicados (na API do Chatbot)
 
-Dentro da API do Chatbot, foram aplicados alguns padrões de design para promover a modularidade e a testabilidade:
+* **Arquitetura em Camadas:** Separação clara entre a camada de apresentação (rotas/routers), lógica de negócio (serviços) e acesso a dados (repositórios).
+* **Padrão Repositório:** Abstração da camada de persistência (`FAQRepository`), isolando a lógica de acesso ao banco de dados.
+* **Injeção de Dependências:** O FastAPI facilita a injeção de dependências (como sessões de banco de dados ou serviços) nos endpoints da API, melhorando a testabilidade.
+* **Validação com Pydantic:** Uso de modelos Pydantic para definir schemas de dados claros, garantindo a validação e a serialização de forma automática.
 
-* **Arquitetura em Camadas (Implicitamente):** Separação clara entre a camada de apresentação (rotas), lógica de negócio (serviços) e acesso a dados (repositórios).
-* **Padrão Repositório:** Abstração da camada de persistência (`FAQRepository`), isolando a lógica de acesso ao banco de dados do restante da aplicação. Isso facilita a troca do banco de dados no futuro sem impactar as camadas superiores.
-* **Injeção de Dependências (Implicita/Manual):** Componentes como o `FAQService` podem receber o `FAQRepository` como dependência, facilitando testes unitários com mocks.
-* **Validação de Entrada:** Módulo dedicado para validar os dados recebidos, garantindo a integridade e segurança.
+## 5. Próximos Passos e Evolução
 
-## 5. Próximos Passos e Evolução (Considerações Futuras)
-
-Embora o design atual atenda aos requisitos, futuras melhorias e expansões podem incluir:
-
-* **Migração de Banco de Dados:** Para PostgreSQL ou MySQL para maior escalabilidade e recursos de concorrência.
-* **Autenticação e Autorização:** Implementação de JWT ou OAuth para proteger endpoints de administração.
-* **Cache:** Introdução de camadas de cache (ex: Redis) para FAQs muito acessadas.
-* **Integração com LLMs:** Conectar o chatbot a modelos de linguagem grandes para respostas mais dinâmicas e contextuais.
-* **Contêineres e Orquestração:** Utilização de Docker e Kubernetes para implantação e gerenciamento de microsserviços em produção.
-* **CI/CD:** Implementação de pipelines de Integração Contínua e Entrega Contínua para automatizar testes e implantações.
+* **Cache:** Introdução de Redis para cachear as FAQs mais acessadas, melhorando a performance.
+* **Autenticação e Autorização:** Implementação de JWT ou OAuth2 (recursos já suportados pelo FastAPI) para proteger endpoints de administração.
+* **Observabilidade:** Integração com ferramentas de logging, métricas e tracing (ex: ELK Stack, Prometheus, Grafana) para monitorar a saúde da aplicação em produção.
+* **Conteinerização e CI/CD:** A estratégia principal de deploy será baseada em Docker e GitHub Actions para automação completa.
 
 ---
