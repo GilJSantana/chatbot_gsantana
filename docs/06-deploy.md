@@ -1,132 +1,79 @@
 # 🚀 Plano de Implantação (Deploy) do Chatbot Gsantana
 
-Este documento descreve o processo de implantação do Chatbot Gsantana, cobrindo os ambientes, as etapas necessárias para o *deploy* da API e do frontend, e as considerações para garantir uma transição bem-sucedida para o ambiente de produção.
+Este documento descreve o processo de implantação do Chatbot Gsantana, com foco em uma estratégia moderna e automatizada usando Docker e CI/CD, alinhada com as melhores práticas de engenharia de software.
 
 ## 1. Visão Geral da Estratégia de Deploy
 
-A estratégia de implantação inicial do Chatbot Gsantana é um processo manual simples, ideal para a fase inicial do projeto. O plano contempla a implantação do backend (API) e do frontend em um ambiente de servidor web, com foco em simplicidade e controle.
+A estratégia de implantação do Chatbot Gsantana é baseada em **conteinerização com Docker e automação com CI/CD (GitHub Actions)**. Isso garante consistência, reprodutibilidade e agilidade no processo de deploy.
 
-* **Abordagem:** Implantação manual (`SSH`/`SCP` ou `git pull`).
-* **Componentes:**
-    * **Backend (API):** Executado como um processo de serviço (usando `systemd` ou similar) com Gunicorn e um servidor web reverso (como Nginx).
-    * **Frontend:** Servido como arquivos estáticos pelo mesmo servidor web.
+*   **Abordagem Principal:** Deploy automatizado via pipeline de CI/CD.
+*   **Componentes Conteinerizados:**
+    *   **Backend (API FastAPI):** Empacotado em uma imagem Docker.
+    *   **Frontend (Estático):** Servido por um web server leve (como Nginx) em uma imagem Docker.
+    *   **Banco de Dados:** Utilização de uma imagem oficial do PostgreSQL para produção.
+*   **Orquestração:** `docker-compose` será usado para gerenciar os contêineres em ambientes de desenvolvimento e produção.
 
 ## 2. Ambientes de Implantação
 
-O projeto considerará os seguintes ambientes:
+*   **Desenvolvimento (Local):** Executado via `docker-compose` na máquina do desenvolvedor. Utilizará SQLite para simplicidade e hot-reloading para o código da API.
+*   **Produção (Servidor Remoto):** Executado via `docker-compose` em um servidor de produção. Utilizará PostgreSQL e imagens otimizadas para produção.
 
-* **Desenvolvimento (Dev):** O ambiente local de cada desenvolvedor. As instruções de execução estão no `README.md`.
-* **Produção (Prod):** O ambiente final e público onde o chatbot estará disponível para os usuários.
+## 3. Estratégia de CI/CD com GitHub Actions
 
-## 3. Pré-requisitos do Servidor de Produção
+Um pipeline de CI/CD será configurado no diretório `.github/workflows/` do repositório. O fluxo de trabalho será acionado a cada `push` na branch `main` e executará os seguintes passos:
 
-Antes de iniciar a implantação, o servidor de produção deve ter os seguintes componentes instalados e configurados:
+1.  **Checkout do Código:** Baixa o código-fonte do repositório.
+2.  **Lint & Test:** Executa os linters (Black, Flake8) e os testes automatizados (Pytest) para garantir a qualidade do código.
+3.  **Build das Imagens Docker:** Constrói as imagens Docker para o backend e o frontend.
+4.  **Push para o Docker Hub:** Envia as imagens construídas para um registro de contêineres (Docker Hub ou similar).
+5.  **Deploy no Servidor de Produção:** Conecta-se ao servidor de produção via SSH e executa um script que:
+    *   Faz o `pull` das novas imagens do Docker Hub.
+    *   Reinicia os serviços usando `docker-compose up -d`.
 
-* **Sistema Operacional:** Linux (ex: Ubuntu Server, Debian).
-* **Linguagem:** Python 3.8+
-* **Gerenciamento de Dependências:** Poetry
-* **Servidor WSGI:** Gunicorn
-* **Servidor Web:** Nginx (para atuar como proxy reverso e servir o frontend)
-* **Ferramentas:** Git, `pip` (para instalar o poetry).
-* **Segurança:** Acesso SSH configurado com chaves públicas.
+## 4. Gerenciamento de Configuração
 
-## 4. Etapas do Processo de Implantação
+*   **Variáveis de Ambiente:** Todas as configurações específicas de cada ambiente (desenvolvimento, produção) serão gerenciadas por meio de arquivos `.env`.
+*   **Exemplo de `.env` para produção:**
 
-As seguintes etapas devem ser executadas no servidor de produção, idealmente por um usuário dedicado de sistema.
-
-### Passo 1: Configuração Inicial
-
-1.  Acesse o servidor via SSH.
-2.  Clone o repositório do projeto em um diretório apropriado (ex: `/var/www/gsantana-chatbot/`).
-    ```bash
-    cd /var/www/
-    git clone [https://github.com/seu-usuario/chatbot_gsantana.git](https://github.com/seu-usuario/chatbot_gsantana.git) gsantana-chatbot
-    cd gsantana-chatbot
     ```
-3.  Instale as dependências usando Poetry.
-    ```bash
-    poetry install --no-dev
-    ```
-    *(O `--no-dev` garante que apenas as dependências de produção sejam instaladas.)*
+    # Configuração do Banco de Dados
+    POSTGRES_USER=user
+    POSTGRES_PASSWORD=secret
+    POSTGRES_SERVER=db
+    POSTGRES_DB=chatbot_db
+    DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER}/${POSTGRES_DB}
 
-### Passo 2: Configuração do Backend (Gunicorn e Systemd)
-
-1.  Crie um arquivo de serviço para o `systemd` (ex: `/etc/systemd/system/gsantana-api.service`) para gerenciar o processo da API.
-    ```ini
-    [Unit]
-    Description=Gunicorn instance to serve the Gsantana API
-    After=network.target
-
-    [Service]
-    User=www-data
-    Group=www-data
-    WorkingDirectory=/var/www/gsantana-chatbot/
-    ExecStart=/home/seu-usuario/.poetry/bin/poetry run gunicorn --workers 4 --bind unix:/tmp/gsantana.sock app:app
-    Restart=always
-
-    [Install]
-    WantedBy=multi-user.target
-    ```
-    *(Adapte o `ExecStart` com o caminho correto para o seu binário do Poetry e o nome do seu módulo/aplicação, ex: `app:app`.)*
-2.  Habilite e inicie o serviço.
-    ```bash
-    sudo systemctl daemon-reload
-    sudo systemctl start gsantana-api
-    sudo systemctl enable gsantana-api
+    # Configuração da Aplicação
+    ALLOWED_ORIGINS=["https://www.lab-yes.com"]
     ```
 
-### Passo 3: Configuração do Frontend (Nginx)
-
-1.  Crie um arquivo de configuração para o Nginx (ex: `/etc/nginx/sites-available/gsantana.conf`).
-2.  Configure o Nginx para servir os arquivos estáticos do frontend e atuar como proxy reverso para a API.
-    ```nginx
-    server {
-        listen 80;
-        server_name chatbot.seu-dominio.com; # Substitua pelo seu domínio
-
-        # Servir arquivos estáticos do frontend
-        location / {
-            root /var/www/gsantana-chatbot/frontend;
-            index index.html;
-        }
-
-        # Proxy reverso para a API
-        location /api {
-            proxy_pass http://unix:/tmp/gsantana.sock;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-    }
-    ```
-3.  Ative a configuração e reinicie o Nginx.
-    ```bash
-    sudo ln -s /etc/nginx/sites-available/gsantana.conf /etc/nginx/sites-enabled/
-    sudo nginx -t
-    sudo systemctl restart nginx
-    ```
+    O arquivo `.env` de produção será criado manualmente no servidor e nunca será comitado no repositório Git.
 
 ## 5. Plano de Rollback
 
-Em caso de falha na implantação, as seguintes ações serão tomadas para restaurar a versão anterior:
+Em caso de falha na implantação, o rollback pode ser feito de duas maneiras:
 
-* Reverter o código para o último *commit* estável usando Git: `git checkout <commit-id-estável>`
-* Reiniciar os serviços `gsantana-api` e `nginx`.
+*   **CI/CD:** Re-executar o pipeline para uma tag/commit anterior que estava estável.
+*   **Manual:** Conectar ao servidor, alterar a tag da imagem no arquivo `docker-compose.prod.yml` para a versão anterior e reiniciar os serviços.
 
 ## 6. Verificação Pós-Implantação
 
-Após a conclusão das etapas, a implantação será verificada:
+*   Acessar a URL da aplicação e verificar se o frontend carrega.
+*   Interagir com o chatbot para confirmar que a API está respondendo corretamente.
+*   Verificar os logs dos contêineres em execução com `docker-compose logs` para garantir que não há erros.
 
-* Acesse `http://chatbot.seu-dominio.com` e verifique se a interface do chatbot é exibida corretamente.
-* Interaja com o chatbot para garantir que as requisições à API (`/api/faq/search`) estão funcionando e retornando respostas válidas.
-* Verifique os logs do Gunicorn (`sudo journalctl -u gsantana-api.service`) e do Nginx para garantir que não há erros.
+## (Alternativa) Processo de Implantação Manual
 
-## 7. Melhorias Futuras
+Este processo pode ser usado para setups mais simples ou como um fallback. **Não é a abordagem recomendada.**
 
-Para aprimorar o processo de implantação, os seguintes passos são planejados:
-
-* **CI/CD:** Implementar um pipeline de Integração Contínua e Entrega Contínua (CI/CD) usando GitHub Actions ou GitLab CI para automatizar testes e o deploy a cada *commit*.
-* **Docker:** Conteinerizar a aplicação (backend e frontend) usando Docker para garantir portabilidade e ambientes de execução consistentes.
-* **Orquestração:** Usar ferramentas como Docker Compose ou Kubernetes para gerenciar a implantação de contêineres e o escalonamento da aplicação.
-* **Monitoramento:** Integrar um sistema de monitoramento (`Prometheus`, `Grafana`) e gerenciamento de logs (`ELK Stack`) para obter visibilidade em tempo real.
+1.  **Pré-requisitos:** Servidor com Python, Poetry e Uvicorn instalados.
+2.  **Código:** Clone ou puxe a versão mais recente do código com `git`.
+3.  **Dependências:** Instale as dependências com `poetry install --no-dev`.
+4.  **Execução:** Inicie a API com Uvicorn. Para produção, é recomendado usar um gerenciador de processos como `systemd`.
+    *   **Exemplo de comando Uvicorn:**
+        ```bash
+        poetry run uvicorn src.chatbot_gsantana.main:app --host 0.0.0.0 --port 8000 --workers 4
+        ```
+    *   É necessário configurar um proxy reverso (como Nginx) na frente do Uvicorn para gerenciar HTTPS e servir os arquivos estáticos do frontend.
 
 ---
