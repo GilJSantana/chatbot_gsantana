@@ -15,7 +15,9 @@ def create_faq(faq: schemas.FAQCreate, db: Session = Depends(deps.get_db)):
 
 
 @router.get("/", response_model=list[schemas.FAQ])
-def read_faqs(skip: int = 0, limit: int = 100, db: Session = Depends(deps.get_db)):
+def read_faqs(
+    skip: int = 0, limit: int = 100, db: Session = Depends(deps.get_db)
+):
     """Lista todas as FAQs."""
     return faq_service.get_faqs(db=db, skip=skip, limit=limit)
 
@@ -30,7 +32,9 @@ def read_faq(faq_id: int, db: Session = Depends(deps.get_db)):
 
 
 @router.put("/{faq_id}", response_model=schemas.FAQ)
-def update_faq(faq_id: int, faq: schemas.FAQCreate, db: Session = Depends(deps.get_db)):
+def update_faq(
+    faq_id: int, faq: schemas.FAQCreate, db: Session = Depends(deps.get_db)
+):
     """Atualiza uma FAQ."""
     db_faq = faq_service.update_faq(db=db, faq_id=faq_id, faq=faq)
     if db_faq is None:
