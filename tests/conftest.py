@@ -38,5 +38,6 @@ def client(db_session):
             db_session.close()
 
     app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
+    test_client = TestClient(app)
+    yield test_client
     del app.dependency_overrides[get_db]
