@@ -1,1 +1,1 @@
-from .faq import FAQ, FAQCreate, FAQBase
+from .faq import FAQ, FAQCreate, FAQBase  # noqa: F401
