@@ -15,11 +15,15 @@ class FAQService:
         """Busca uma FAQ pelo ID."""
         return faq_repository.get_faq(db=db, faq_id=faq_id)
 
-    def get_faqs(self, db: Session, skip: int = 0, limit: int = 100) -> list[models.FAQ]:
+    def get_faqs(
+        self, db: Session, skip: int = 0, limit: int = 100
+    ) -> list[models.FAQ]:
         """Busca todas as FAQs."""
         return faq_repository.get_faqs(db=db, skip=skip, limit=limit)
 
-    def update_faq(self, db: Session, faq_id: int, faq: schemas.FAQCreate) -> models.FAQ | None:
+    def update_faq(
+        self, db: Session, faq_id: int, faq: schemas.FAQCreate
+    ) -> models.FAQ | None:
         """Atualiza uma FAQ."""
         return faq_repository.update_faq(db=db, faq_id=faq_id, faq=faq)
 

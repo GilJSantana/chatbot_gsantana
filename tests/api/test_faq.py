@@ -5,7 +5,10 @@ def test_create_faq(client: TestClient):
     """Testa a criação de uma nova FAQ."""
     response = client.post(
         "/api/v1/faqs/",
-        json={"question": "Qual o horário de funcionamento?", "answer": "Das 8h às 18h."},
+        json={
+            "question": "Qual o horário de funcionamento?",
+            "answer": "Das 8h às 18h.",
+        },
     )
     assert response.status_code == 200
     data = response.json()
