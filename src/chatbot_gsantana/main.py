@@ -9,7 +9,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Chatbot LabYes",
     description="API para o chatbot de FAQ do LabYes",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 app.include_router(api_router, prefix="/api/v1")
