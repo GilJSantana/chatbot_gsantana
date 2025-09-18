@@ -50,3 +50,4 @@ jobs:
 
     # - name: Push Docker image
     #   run: docker push chatbot-gsantana-api:latest
+    #   Force re-avaliacao
