@@ -6,7 +6,7 @@ authors = [
     {name = "Gsantana",email = "gilmar.jesus@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4.0"
 dependencies = [
     "fastapi (>=0.111.0,<0.112.0)",
     "uvicorn[standard] (>=0.30.1,<0.31.0)",
@@ -29,6 +29,7 @@ isort = "^6.0.1"
 flake8 = "^7.3.0"
 pre-commit = "^4.3.0"
 pytest-mock = "^3.14.1"
+diagrams = "^0.24.4"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -36,4 +37,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 max-line-length = 88
-extend-ignore = "E203"
+extend-ignore = "E203,E501"
