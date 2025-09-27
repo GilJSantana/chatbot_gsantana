@@ -23,6 +23,11 @@ def get_faqs(db: Session, skip: int = 0, limit: int = 100) -> list[FAQ]:
     return db.query(FAQ).offset(skip).limit(limit).all()
 
 
+def get_faq_by_question_text(db: Session, question_text: str) -> FAQ | None:
+    """Busca uma FAQ pela pergunta exata."""
+    return db.query(FAQ).filter(FAQ.question == question_text).first()
+
+
 def update_faq(db: Session, faq_id: int, faq: FAQCreate) -> FAQ | None:
     """Atualiza uma FAQ existente."""
     db_faq = db.query(FAQ).filter(FAQ.id == faq_id).first()
