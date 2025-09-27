@@ -1,0 +1,260 @@
+/* Variáveis de Cores (baseadas em lab-yes.com) */
+:root {
+    --primary-blue: #33475b; /* Azul corporativo (Dark Azure) */
+    --light-blue: #e1e7ec;   /* Tom mais claro do azul corporativo */
+    --text-dark: #333;       /* Texto escuro */
+    --text-light: #fff;      /* Texto claro */
+    --chat-bubble-bot: #e0e0e0; /* Balão do bot */
+    --chat-background: #f8f8f8; /* Fundo da área de mensagens */
+    --shadow-light: rgba(0, 0, 0, 0.2);
+    --shadow-medium: rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    min-height: 150vh; /* Para simular scroll e o ícone fixo */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
+}
+
+.content {
+    width: 80%;
+    max-width: 900px;
+    background-color: var(--text-light);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--shadow-light);
+    text-align: center;
+}
+
+/* Ícone Flutuante e Mascote */
+.chatbot-icon-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px; /* Espaço entre a mascote e o ícone */
+}
+
+.chatbot-mascot {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    object-fit: cover; /* Garante que a imagem preencha o círculo */
+    box-shadow: 0px 4px 8px var(--shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chatbot-icon {
+    width: 56px;
+    height: 56px;
+    background-color: var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 4px 8px var(--shadow-light);
+    color: var(--text-light);
+    font-size: 1.5em;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chatbot-icon-container:hover .chatbot-mascot,
+.chatbot-icon-container:hover .chatbot-icon {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px var(--shadow-medium);
+}
+
+/* Caixa de Boas-Vindas (Opcional) */
+.welcome-bubble {
+    position: absolute;
+    bottom: 150px; /* Ajustado para a nova altura da mascote */
+    right: 0; /* Alinhado à direita do contêiner */
+    background-color: var(--text-light);
+    color: var(--text-dark);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px var(--shadow-light);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    transform: translateY(10px);
+}
+
+.welcome-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 23px; /* Aponta para o centro do ícone de chat */
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: var(--text-light) transparent transparent transparent;
+}
+
+.chatbot-icon-container:hover .welcome-bubble {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Chat Aberto */
+.chatbot-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px; /* Largura ajustada */
+    height: 500px; /* Altura ajustada */
+    background-color: var(--text-light);
+    border-radius: 10px;
+    box-shadow: 0px 8px 16px var(--shadow-medium);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1001;
+    transform: scale(0); /* Escondido inicialmente */
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-in-out;
+}
+
+.chatbot-window.open {
+    transform: scale(1);
+}
+
+.chatbot-header {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.chatbot-header .actions i {
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.chatbot-body {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: var(--chat-background);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    display: flex;
+    max-width: 80%;
+}
+
+.message.bot {
+    justify-content: flex-start;
+}
+
+.message.user {
+    justify-content: flex-end;
+    margin-left: auto; /* Empurra para a direita */
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message.bot .message-bubble {
+    background-color: var(--chat-bubble-bot);
+    color: var(--text-dark);
+    border-bottom-left-radius: 0;
+}
+
+.message.user .message-bubble {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+    border-bottom-right-radius: 0;
+}
+
+.suggestion-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: flex-start; /* Alinha botões à esquerda */
+}
+
+.suggestion-button {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.suggestion-button:hover {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+}
+
+.chatbot-input-area {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chatbot-input-area input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 1em;
+    outline: none;
+}
+
+.chatbot-input-area button {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.chatbot-input-area button:hover {
+    background-color: #23303d; /* Tom mais escuro do azul corporativo */
+}
+
+/* Link dentro da mensagem */
+.message-bubble a {
+    color: var(--primary-blue);
+    text-decoration: underline;
+}
+.message.user .message-bubble a {
+    color: var(--text-light);
+}
