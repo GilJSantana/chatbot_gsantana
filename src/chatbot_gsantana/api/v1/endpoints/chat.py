@@ -22,7 +22,8 @@ def ask_question(question: Question, db: Session = Depends(deps.get_db)):
     if not answer:
         # Se nenhuma resposta for encontrada, retorna uma mensagem padrão.
         return Answer(
-            answer="Desculpe, não encontrei uma resposta para essa pergunta. Tente reformular."
+            answer="Desculpe, não encontrei uma resposta para essa pergunta. "
+            "Tente reformular."
         )
 
     return Answer(answer=answer)
