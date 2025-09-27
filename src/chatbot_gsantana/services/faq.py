@@ -33,7 +33,9 @@ class FAQService:
 
     def get_answer_for_question(self, db: Session, question_text: str) -> str | None:
         """Busca a resposta para uma pergunta, por correspondência exata."""
-        faq = faq_repository.get_faq_by_question_text(db=db, question_text=question_text)
+        faq = faq_repository.get_faq_by_question_text(
+            db=db, question_text=question_text
+        )
         if faq:
             return faq.answer
         return None
