@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ....schemas.faq import Question, Answer # CORREÇÃO: Importa Question e Answer diretamente
+from ....schemas.faq import (
+    Question,
+    Answer,
+)  # CORREÇÃO: Importa Question e Answer diretamente
 from ....api import deps
 from ....services.faq import faq_service
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Answer) # Usa Answer diretamente
+@router.post("/", response_model=Answer)  # Usa Answer diretamente
 def ask_question(question: Question, db: Session = Depends(deps.get_db)):
     """
     Recebe uma pergunta do usuário e retorna a melhor resposta encontrada.
