@@ -13,74 +13,72 @@ let inactivityTimer;
 // --- Funções do Chat ---
 
 function addMessage(sender, text, isHtml = false) {
+    const messageId = `msg-${Date.now()}`;
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', sender);
+    messageDiv.id = messageId;
+
     const bubbleDiv = document.createElement('div');
     bubbleDiv.classList.add('message-bubble');
+
     if (isHtml) {
         bubbleDiv.innerHTML = text;
     } else {
         bubbleDiv.textContent = text;
     }
+
     messageDiv.appendChild(bubbleDiv);
     chatBody.appendChild(messageDiv);
-    chatBody.scrollTop = chatBody.scrollHeight; // Rola para o final
-}
-
-function addSuggestionButtons(buttons) {
-    const buttonsDiv = document.createElement('div');
-    buttonsDiv.classList.add('message', 'bot');
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.classList.add('message-bubble');
-    const suggestionContainer = document.createElement('div');
-    suggestionContainer.classList.add('suggestion-buttons');
-
-    buttons.forEach(buttonText => {
-        const button = document.createElement('button');
-        button.classList.add('suggestion-button');
-        button.textContent = buttonText;
-        button.onclick = () => handleUserMessage(buttonText, true);
-        suggestionContainer.appendChild(button);
-    });
-    bubbleDiv.appendChild(suggestionContainer);
-    buttonsDiv.appendChild(bubbleDiv);
-    chatBody.appendChild(buttonsDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
+    return messageId;
 }
 
-function handleUserMessage(message, isButtonClick = false) {
-    if (!isButtonClick) {
-        addMessage('user', message);
+function showTypingIndicator() {
+    return addMessage('bot', '<div class="typing-indicator"><span></span><span></span><span></span></div>', true);
+}
+
+function removeTypingIndicator(indicatorId) {
+    const indicator = document.getElementById(indicatorId);
+    if (indicator) {
+        indicator.remove();
     }
+}
+
+async function handleUserMessage(message) {
+    // 1. Adiciona a mensagem do usuário à interface
+    addMessage('user', message);
     chatInput.value = '';
 
-    setTimeout(() => {
-        let botResponse = "Desculpe, não entendi sua pergunta. Posso ajudar com outra coisa?";
-        let suggestionButtons = [];
+    // 2. Mostra o indicador de "digitando..."
+    const typingIndicatorId = showTypingIndicator();
 
-        if (message.toLowerCase().includes('olá') || message.toLowerCase().includes('oi') || message.toLowerCase().includes('ajuda')) {
-            botResponse = "Olá! Como posso ajudar você hoje?";
-            suggestionButtons = ["Quais serviços vocês oferecem?", "Como entro em contato?", "Sobre o projeto Gsantana"];
-        } else if (message.toLowerCase().includes('serviços')) {
-            botResponse = "Oferecemos testes de software, consultoria em QA e automação de testes. Gostaria de saber mais sobre algum deles?";
-            suggestionButtons = ["Testes de Software", "Consultoria em QA", "Automação de Testes"];
-        } else if (message.toLowerCase().includes('automação de testes')) {
-            botResponse = "A automação de testes visa otimizar o processo de validação de software... <a href='https://www.lab-yes.com/automacao-testes' target='_blank'>Saiba mais aqui</a>.";
-            addMessage('bot', botResponse, true);
-            return;
-        } else if (message.toLowerCase().includes('contato')) {
-            botResponse = "Você pode nos contatar em <a href='mailto:contato@lab-yes.com'>contato@lab-yes.com</a>.";
-            addMessage('bot', botResponse, true);
-            return;
-        } else if (message.toLowerCase().includes('projeto gsantana')) {
-            botResponse = "O projeto Gsantana é um chatbot para auxiliar os usuários do site Lab-Yes.";
+    try {
+        // 3. Envia a pergunta para a API no endpoint correto com a barra final
+        const response = await fetch('/api/v1/chat/', { // CORREÇÃO: Adicionada a barra final
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: message }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        const data = await response.json();
+        const botResponse = data.answer; // Assumindo que a API retorna { "answer": "..." }
+
+        // 4. Remove o indicador e exibe a resposta da API
+        removeTypingIndicator(typingIndicatorId);
         addMessage('bot', botResponse);
-        if (suggestionButtons.length > 0) {
-            addSuggestionButtons(suggestionButtons);
-        }
-    }, 800);
+
+    } catch (error) {
+        console.error('Erro ao contatar a API:', error);
+        // 5. Remove o indicador e exibe uma mensagem de erro
+        removeTypingIndicator(typingIndicatorId);
+        addMessage('bot', 'Desculpe, estou com problemas para me conectar. Tente novamente mais tarde.');
+    }
 }
 
 // --- Funções de UI e Estado ---
@@ -89,23 +87,20 @@ function openChatWindow() {
     chatbotWindow.classList.add('open');
     chatbotIconContainer.style.display = 'none';
     clearTimeout(welcomeBubbleTimeout);
-    // Adiciona estilos inline para esconder a bolha ao abrir o chat
     welcomeBubble.style.opacity = '0';
     welcomeBubble.style.visibility = 'hidden';
 
     if (chatBody.children.length === 0) {
         addMessage('bot', "Olá! Como posso ajudar você hoje?");
-        addSuggestionButtons(["Quais serviços vocês oferecem?", "Como entro em contato?", "Sobre o projeto Gsantana"]);
     }
 }
 
 function closeChatWindow() {
     chatbotWindow.classList.remove('open');
     chatbotIconContainer.style.display = 'flex';
-    // BUG FIX: Remove os estilos inline para que o CSS :hover volte a funcionar
     welcomeBubble.style.opacity = '';
     welcomeBubble.style.visibility = '';
-    resetInactivityTimer(); // Reinicia o timer para a bolha poder aparecer novamente
+    resetInactivityTimer();
 }
 
 function showWelcomeBubble() {
@@ -129,7 +124,6 @@ function resetInactivityTimer() {
 // --- Event Listeners ---
 
 chatbotIconContainer.addEventListener('click', openChatWindow);
-
 closeChat.addEventListener('click', closeChatWindow);
 minimizeChat.addEventListener('click', closeChatWindow);
 
@@ -150,5 +144,4 @@ document.addEventListener('mousemove', resetInactivityTimer);
 document.addEventListener('keypress', resetInactivityTimer);
 document.addEventListener('scroll', resetInactivityTimer);
 
-// Inicia o ciclo de vida do chatbot
 resetInactivityTimer();
