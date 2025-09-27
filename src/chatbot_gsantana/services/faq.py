@@ -29,7 +29,7 @@ class FAQService:
 
     def delete_faq(self, db: Session, faq_id: int) -> models.FAQ | None:
         """Deleta uma FAQ."""
-        return faq_repository.delete_faq(db=db, faq_id=faq)
+        return faq_repository.delete_faq(db=db, faq_id=faq_id)
 
     def get_answer_for_question(self, db: Session, question_text: str) -> str | None:
         """Busca a resposta para uma pergunta, por correspondência exata."""
