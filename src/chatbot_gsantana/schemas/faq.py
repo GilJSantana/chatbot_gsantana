@@ -21,3 +21,15 @@ class FAQ(FAQBase):
 
     class Config:
         from_attributes = True
+
+
+class Question(BaseModel):
+    """Schema para a pergunta do usuário."""
+
+    question: str
+
+
+class Answer(BaseModel):
+    """Schema para a resposta do chatbot."""
+
+    answer: str
