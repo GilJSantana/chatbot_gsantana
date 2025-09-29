@@ -17,10 +17,14 @@ dependencies = [
     "nltk (>=3.9.1,<4.0.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
-    "psycopg2-binary (>=2.9.9,<3.0.0)"
+    "psycopg2-binary (>=2.9.9,<3.0.0)",
+    "python-jose[cryptography] (>=3.3.0,<4.0.0)",
+    "passlib (>=1.7.4,<2.0.0)",
+    "argon2-cffi (>=23.1.0,<24.0.0)"
 ]
 
 [tool.poetry]
+packages = [{include = "chatbot_gsantana", from = "src"}]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
@@ -30,6 +34,7 @@ flake8 = "^7.3.0"
 pre-commit = "^4.3.0"
 pytest-mock = "^3.14.1"
 diagrams = "^0.24.4"
+pytest-dotenv = "^0.5.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
