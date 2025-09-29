@@ -1,11 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base
 
-from .config import settings
-
-engine = create_engine(settings.DATABASE_URL)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
+# Apenas a Base declarativa é definida no nível do módulo.
+# A criação do engine e da sessão será feita de forma "preguiçosa" (lazy)
+# para melhorar a testabilidade.
 Base = declarative_base()
