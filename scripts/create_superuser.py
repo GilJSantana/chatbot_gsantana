@@ -8,6 +8,7 @@ from chatbot_gsantana.services.user import user_service
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def create_superuser():
     """Cria um superusuário no banco de dados."""
     logger.info("Iniciando criação de superusuário...")
