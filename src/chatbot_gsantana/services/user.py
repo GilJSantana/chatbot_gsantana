@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -20,10 +21,31 @@ class UserService:
         return user
 
     def create_user(self, db: Session, *, user_in: schemas.UserCreate) -> models.User:
-        """Cria um novo usuário."""
+        """
+        Cria um novo usuário após validar se o username e email já existem.
+        """
+        db_user_by_username = user_repository.get_user_by_username(
+            db, username=user_in.username
+        )
+        if db_user_by_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already registered",
+            )
+
+        db_user_by_email = user_repository.get_user_by_email(db, email=user_in.email)
+        if db_user_by_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered",
+            )
+
         hashed_password = security.get_password_hash(user_in.password)
         db_user = user_repository.create_user(
-            db, username=user_in.username, hashed_password=hashed_password
+            db,
+            username=user_in.username,
+            email=user_in.email,
+            hashed_password=hashed_password,
         )
         return db_user
 
