@@ -1,35 +1,38 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
+# --- Schemas Base ---
 class FAQBase(BaseModel):
     """Schema base para FAQ, com campos comuns."""
+
+    question: Optional[str] = None
+    answer: Optional[str] = None
+
+
+# --- Schema para Criação ---
+class FAQCreate(FAQBase):
+    """Schema usado para criar uma nova FAQ."""
 
     question: str
     answer: str
 
 
-class FAQCreate(FAQBase):
-    """Schema para a criação de uma nova FAQ."""
+# --- Schema para Atualização ---
+class FAQUpdate(FAQBase):
+    """Schema usado para atualizar uma FAQ. Todos os campos são opcionais."""
 
     pass
 
 
+# --- Schema para Leitura (Resposta da API) ---
 class FAQ(FAQBase):
-    """Schema para a leitura de uma FAQ, incluindo o ID."""
+    """Schema usado para retornar uma FAQ da API."""
 
     id: int
+    question: str
+    answer: str
 
     class Config:
         from_attributes = True
-
-
-class Question(BaseModel):
-    """Schema para a pergunta do usuário."""
-
-    question: str
-
-
-class Answer(BaseModel):
-    """Schema para a resposta do chatbot."""
-
-    answer: str
