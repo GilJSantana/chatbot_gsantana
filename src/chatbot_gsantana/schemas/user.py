@@ -1,10 +1,14 @@
-from pydantic import BaseModel
+from typing import List
+
+from pydantic import BaseModel, EmailStr
+from .faq import FAQ
 
 
 class UserBase(BaseModel):
     """Schema base para o usuário."""
 
     username: str
+    email: EmailStr  # Adiciona o campo email com validação de formato
 
 
 class UserCreate(UserBase):
@@ -17,19 +21,8 @@ class User(UserBase):
     """Schema para a leitura de um usuário."""
 
     id: int
+    is_active: bool = True
+    faqs: List[FAQ] = []
 
     class Config:
         from_attributes = True
-
-
-class Token(BaseModel):
-    """Schema para o token de acesso."""
-
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    """Schema para os dados contidos no token JWT."""
-
-    username: str | None = None
