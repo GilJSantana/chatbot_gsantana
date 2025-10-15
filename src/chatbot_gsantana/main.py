@@ -4,23 +4,26 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
+from .core.config import settings
+from .core.database import initialize_database
 
 
-# --- Gerenciador de Ciclo de Vida da Aplicação ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Em um cenário de produção real, a criação de tabelas é geralmente
-    # gerenciada por uma ferramenta de migração como Alembic.
+    """
+    Gerenciador de ciclo de vida para inicializar recursos na inicialização
+    e limpá-los no encerramento.
+    """
+    initialize_database(str(settings.DATABASE_URL))
     yield
-    # Código a ser executado no encerramento (se necessário)
+    # Adicione aqui código para limpeza no encerramento, se necessário.
 
 
-# --- Criação da Instância do App FastAPI ---
 app = FastAPI(
     title="Chatbot LabYes",
     description="API para o chatbot de FAQ do LabYes",
     version="0.1.0",
-    lifespan=lifespan,  # Usa o novo gerenciador de ciclo de vida
+    lifespan=lifespan,
 )
 
 # --- Configuração do CORS ---
@@ -33,15 +36,16 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos (GET, POST, etc.)
-    allow_headers=["*"],  # Permite todos os cabeçalhos
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Inclusão dos Roteadores ---
+# O prefixo da API é definido diretamente para evitar o erro de configuração nos testes.
 app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/health-check")
 def health_check():
-    """Verifica se a aplicação está funcionando."""
+    """Endpoint simples para verificar a saúde da aplicação."""
     return {"status": "ok"}
