@@ -1,8 +1,8 @@
 from datetime import timedelta
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 
 from .... import schemas
 from ....api import deps
@@ -14,8 +14,8 @@ router = APIRouter()
 
 @router.post("/token", response_model=schemas.Token)
 def login_for_access_token(
-    db: Session = Depends(deps.get_db),
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: deps.SessionDep,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     """Autentica o usuário e retorna um token de acesso."""
     user = user_service.authenticate_user(
@@ -30,7 +30,6 @@ def login_for_access_token(
     access_token_expires = timedelta(
         minutes=security.settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    # Quebra da linha para corrigir o E501
     access_token = security.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
