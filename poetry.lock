@@ -18,7 +18,7 @@ version = "4.10.0"
 description = "High-level concurrency and networking framework on top of asyncio or Trio"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "anyio-4.10.0-py3-none-any.whl", hash = "sha256:60e474ac86736bbfd6f210f7a61218939c318f43f9972497381f1c5e930ed3d1"},
     {file = "anyio-4.10.0.tar.gz", hash = "sha256:3f3fae35c96039744587aa5b8371e7e8e603c0702999535961dd336026973ba6"},
@@ -95,6 +95,34 @@ cffi = [
 ]
 
 [[package]]
+name = "bcrypt"
+version = "3.2.2"
+description = "Modern password hashing for your software and your servers"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "bcrypt-3.2.2-cp36-abi3-macosx_10_10_universal2.whl", hash = "sha256:7180d98a96f00b1050e93f5b0f556e658605dd9f524d0b0e68ae7944673f525e"},
+    {file = "bcrypt-3.2.2-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.manylinux_2_24_aarch64.whl", hash = "sha256:61bae49580dce88095d669226d5076d0b9d927754cedbdf76c6c9f5099ad6f26"},
+    {file = "bcrypt-3.2.2-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:88273d806ab3a50d06bc6a2fc7c87d737dd669b76ad955f449c43095389bc8fb"},
+    {file = "bcrypt-3.2.2-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:6d2cb9d969bfca5bc08e45864137276e4c3d3d7de2b162171def3d188bf9d34a"},
+    {file = "bcrypt-3.2.2-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2b02d6bfc6336d1094276f3f588aa1225a598e27f8e3388f4db9948cb707b521"},
+    {file = "bcrypt-3.2.2-cp36-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:a2c46100e315c3a5b90fdc53e429c006c5f962529bc27e1dfd656292c20ccc40"},
+    {file = "bcrypt-3.2.2-cp36-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:7d9ba2e41e330d2af4af6b1b6ec9e6128e91343d0b4afb9282e54e5508f31baa"},
+    {file = "bcrypt-3.2.2-cp36-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:cd43303d6b8a165c29ec6756afd169faba9396a9472cdff753fe9f19b96ce2fa"},
+    {file = "bcrypt-3.2.2-cp36-abi3-win32.whl", hash = "sha256:4e029cef560967fb0cf4a802bcf4d562d3d6b4b1bf81de5ec1abbe0f1adb027e"},
+    {file = "bcrypt-3.2.2-cp36-abi3-win_amd64.whl", hash = "sha256:7ff2069240c6bbe49109fe84ca80508773a904f5a8cb960e02a977f7f519b129"},
+    {file = "bcrypt-3.2.2.tar.gz", hash = "sha256:433c410c2177057705da2a9f2cd01dd157493b2a7ac14c8593a16b3dab6b6bfb"},
+]
+
+[package.dependencies]
+cffi = ">=1.1"
+
+[package.extras]
+tests = ["pytest (>=3.2.1,!=3.3.0)"]
+typecheck = ["mypy"]
+
+[[package]]
 name = "black"
 version = "25.1.0"
 description = "The uncompromising code formatter."
@@ -145,7 +173,7 @@ version = "2025.8.3"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "certifi-2025.8.3-py3-none-any.whl", hash = "sha256:f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5"},
     {file = "certifi-2025.8.3.tar.gz", hash = "sha256:e564105f78ded564e3ae7c923924435e1daa7463faeab5bb932bc53ffae63407"},
@@ -729,7 +757,7 @@ version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"},
     {file = "h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1"},
@@ -741,7 +769,7 @@ version = "1.0.9"
 description = "A minimal low-level HTTP client."
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"},
     {file = "httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8"},
@@ -815,14 +843,14 @@ test = ["Cython (>=0.29.24)"]
 
 [[package]]
 name = "httpx"
-version = "0.28.1"
+version = "0.27.2"
 description = "The next generation HTTP client."
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
-    {file = "httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"},
-    {file = "httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc"},
+    {file = "httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0"},
+    {file = "httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2"},
 ]
 
 [package.dependencies]
@@ -830,6 +858,7 @@ anyio = "*"
 certifi = "*"
 httpcore = "==1.*"
 idna = "*"
+sniffio = "*"
 
 [package.extras]
 brotli = ["brotli ; platform_python_implementation == \"CPython\"", "brotlicffi ; platform_python_implementation != \"CPython\""]
@@ -859,7 +888,7 @@ version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.6"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
     {file = "idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9"},
@@ -1118,6 +1147,9 @@ files = [
     {file = "passlib-1.7.4-py2.py3-none-any.whl", hash = "sha256:aa6bca462b8d8bda89c70b382f0c298a20b5560af6cbfa2dce410c0a2fb669f1"},
     {file = "passlib-1.7.4.tar.gz", hash = "sha256:defd50f72b65c5402ab2c573830a6978e5f202ad0d984793c8dde2c4152ebe04"},
 ]
+
+[package.dependencies]
+bcrypt = {version = ">=3.1.0", optional = true, markers = "extra == \"bcrypt\""}
 
 [package.extras]
 argon2 = ["argon2-cffi (>=18.2.0)"]
@@ -1862,7 +1894,7 @@ version = "1.3.1"
 description = "Sniff out which async library your code is running under"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
     {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
@@ -2368,4 +2400,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "889944a60c089f2a76a13b5d3f9b75c6a1204cc57b809a40cbda5388d435f849"
+content-hash = "9dbbe5e9761de20793ca49f4f6041cfd472351d490ad181052ec969c704cee02"
