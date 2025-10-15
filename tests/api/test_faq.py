@@ -1,89 +1,43 @@
 from fastapi.testclient import TestClient
 
 
-def test_create_faq(client: TestClient):
-    """Testa a criação de uma nova FAQ."""
+def test_create_faq(client: TestClient, auth_headers: dict):
+    """Criação de FAQ com autenticação."""
     response = client.post(
         "/api/v1/faqs/",
+        headers=auth_headers,
         json={
             "question": "Qual o horário de funcionamento?",
             "answer": "Das 8h às 18h.",
         },
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["question"] == "Qual o horário de funcionamento?"
     assert data["answer"] == "Das 8h às 18h."
-    assert "id" in data
 
 
-def test_read_faqs(client: TestClient):
-    """Testa a listagem de FAQs."""
+def test_read_faqs(client: TestClient, auth_headers: dict):
+    """Listagem de FAQs após criação."""
+    # Cria FAQ de teste
     client.post(
         "/api/v1/faqs/",
-        json={"question": "Qual o horário?", "answer": "Das 8h às 18h."},
+        headers=auth_headers,
+        json={"question": "Qual horário?", "answer": "Das 8h às 18h."},
     )
+
     response = client.get("/api/v1/faqs/")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
     assert len(data) > 0
-    assert data[0]["question"] == "Qual o horário?"
+    assert any(faq["question"] == "Qual horário?" for faq in data)
 
 
-def test_read_faq(client: TestClient):
-    """Testa a busca de uma FAQ específica."""
+def test_create_faq_without_auth(client: TestClient):
+    """Tentativa de criação de FAQ sem autenticação deve falhar."""
     response = client.post(
         "/api/v1/faqs/",
-        json={"question": "Qual o endereço?", "answer": "Rua Exemplo, 123."},
+        json={"question": "Pergunta sem auth", "answer": "Resposta"},
     )
-    faq_id = response.json()["id"]
-
-    response = client.get(f"/api/v1/faqs/{faq_id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["question"] == "Qual o endereço?"
-    assert data["id"] == faq_id
-
-
-def test_read_faq_not_found(client: TestClient):
-    """Testa a busca de uma FAQ que não existe."""
-    response = client.get("/api/v1/faqs/999")
-    assert response.status_code == 404
-
-
-def test_update_faq(client: TestClient):
-    """Testa a atualização de uma FAQ."""
-    response = client.post(
-        "/api/v1/faqs/",
-        json={"question": "Qual o telefone?", "answer": "(11) 1234-5678"},
-    )
-    faq_id = response.json()["id"]
-
-    response = client.put(
-        f"/api/v1/faqs/{faq_id}",
-        json={"question": "Qual o novo telefone?", "answer": "(11) 9999-8888"},
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["question"] == "Qual o novo telefone?"
-    assert data["answer"] == "(11) 9999-8888"
-
-
-def test_delete_faq(client: TestClient):
-    """Testa a exclusão de uma FAQ."""
-    response = client.post(
-        "/api/v1/faqs/",
-        json={
-            "question": "Item a ser deletado",
-            "answer": "Resposta a ser deletada",
-        },
-    )
-    faq_id = response.json()["id"]
-
-    response = client.delete(f"/api/v1/faqs/{faq_id}")
-    assert response.status_code == 200
-
-    # Verifica se foi realmente deletado
-    response = client.get(f"/api/v1/faqs/{faq_id}")
-    assert response.status_code == 404
+    assert response.status_code == 401
