@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict  # Adiciona ConfigDict
 from .faq import FAQ
 
 
@@ -24,5 +24,5 @@ class User(UserBase):
     is_active: bool = True
     faqs: List[FAQ] = []
 
-    class Config:
-        from_attributes = True
+    # CORREÇÃO: Substitui class Config por model_config = ConfigDict
+    model_config = ConfigDict(from_attributes=True)
