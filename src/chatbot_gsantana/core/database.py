@@ -3,8 +3,9 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker, declarative_base
+
+# CORREÇÃO: Importa declarative_base de sqlalchemy.orm
 
 Base = declarative_base()
 
