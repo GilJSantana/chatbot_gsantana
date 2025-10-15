@@ -28,9 +28,12 @@ with Diagram(
 
     with Cluster("Ambiente Docker (docker-compose)"):
         with Cluster("API Service (FastAPI)"):
-            api_container = Fastapi("API Endpoints\n(Camada de Apresentação)", width="3.0")
-            service_layer = Python("Lógica de Negócio\n(Camada de Serviço)",width="3.0")
-            repo_layer = Python("Acesso a Dados\n(Camada de Repositório)",width="3.0")
+            api_container = Fastapi(
+                "API Endpoints\n(Camada de Apresentação)", width="3.0")
+            service_layer = Python(
+                "Lógica de Negócio\n(Camada de Serviço)", width="3.0")
+            repo_layer = Python(
+                "Acesso a Dados\n(Camada de Repositório)", width="3.0")
 
         postgres_db = Postgresql("PostgreSQL DB")
 
