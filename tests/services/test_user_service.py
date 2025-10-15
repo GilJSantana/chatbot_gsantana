@@ -66,12 +66,26 @@ def test_authenticate_user_not_found(db_session_mock, mocker: MockerFixture):
 
 def test_create_user(db_session_mock, mocker: MockerFixture):
     """Testa a criação de um novo usuário."""
-    user_in = UserCreate(username="newuser", password="newpassword")
+    user_in = UserCreate(
+        username="newuser", email="newuser@example.com", password="newpassword"
+    )
     mocker.patch(
         "chatbot_gsantana.core.security.get_password_hash", return_value=REALISTIC_HASH
     )
+    # CORREÇÃO: Mocka as verificações de existência de usuário para retornar None
+    mocker.patch(
+        "chatbot_gsantana.repositories.user.get_user_by_username", return_value=None
+    )
+    mocker.patch(
+        "chatbot_gsantana.repositories.user.get_user_by_email", return_value=None
+    )
 
-    mock_created_user = User(id=2, username="newuser", hashed_password=REALISTIC_HASH)
+    mock_created_user = User(
+        id=2,
+        username="newuser",
+        email="newuser@example.com",
+        hashed_password=REALISTIC_HASH,
+    )
     create_user_repo_mock = mocker.patch(
         "chatbot_gsantana.repositories.user.create_user", return_value=mock_created_user
     )
@@ -79,6 +93,10 @@ def test_create_user(db_session_mock, mocker: MockerFixture):
     created_user = user_service.create_user(db_session_mock, user_in=user_in)
 
     create_user_repo_mock.assert_called_once_with(
-        db_session_mock, username="newuser", hashed_password=REALISTIC_HASH
+        db_session_mock,
+        username="newuser",
+        email="newuser@example.com",
+        hashed_password=REALISTIC_HASH,
     )
     assert created_user.username == "newuser"
+    assert created_user.email == "newuser@example.com"
