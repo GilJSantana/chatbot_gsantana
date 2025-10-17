@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
 from .core.config import settings
-from .core.database import initialize_database
+from .core.database import engine, Base # Importa Base e engine
 
 
 @asynccontextmanager
@@ -14,7 +14,8 @@ async def lifespan(app: FastAPI):
     Gerenciador de ciclo de vida para inicializar recursos na inicialização
     e limpá-los no encerramento.
     """
-    initialize_database(str(settings.DATABASE_URL))
+    # CORREÇÃO: Cria as tabelas do banco de dados na inicialização
+    Base.metadata.create_all(bind=engine)
     yield
     # Adicione aqui código para limpeza no encerramento, se necessário.
 
