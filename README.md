@@ -4,7 +4,7 @@ Este é o repositório principal do projeto **Chatbot Gjsantana**, um sistema de
 
 ## ✨ Visão Geral
 
-O Chatbot Gsantana visa aprimorar a experiência do usuário no site do Lab Yes!, fornecendo respostas rápidas e automatizadas para dúvidas comuns. Ele é projetado como uma API RESTful em Python (Flask) com um frontend leve em JavaScript que pode ser facilmente integrado a qualquer página web.
+O Chatbot Gsantana visa aprimorar a experiência do usuário no site do Lab Yes!, fornecendo respostas rápidas e automatizadas para dúvidas comuns. Ele é projetado como uma API RESTful em Python com um frontend leve em JavaScript que pode ser facilmente integrado a qualquer página web.
 
 ## 📐 Arquitetura
 
@@ -18,86 +18,106 @@ Para detalhes completos e visuais dos diagramas, consulte o documento [Modelo C4
 
 ## 🚀 Tecnologias Utilizadas
 
-* **Backend:** Python 🐍, Flask, Gunicorn
-* **Banco de Dados:** SQLite (para gerenciamento de FAQs)
+* **Backend:** Python 🐍, FastAPI, Uvicorn
+* **Banco de Dados:** PostgreSQL 🐘
+* **Containerização:** Docker 🐳, Docker Compose
 * **Frontend:** JavaScript, HTML, CSS (interface minimalista do chatbot)
 * **Gerenciamento de Dependências:** Poetry
 * **Versionamento:** Git
 * **Documentação:** Markdown, Modelo C4
 
-## 📦 Como Rodar o Projeto (Desenvolvimento)
+## 📦 Rodando o Projeto com Docker
 
-Siga os passos abaixo para configurar e executar o projeto em seu ambiente local:
+A maneira recomendada para rodar o projeto localmente é utilizando Docker, que garante um ambiente consistente e isolado.
 
 ### Pré-requisitos
 
 Certifique-se de ter instalado:
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 
-* [Python 3.8+](https://www.python.org/downloads/)
-* [Poetry](https://python-poetry.org/docs/#installation) (gerenciador de dependências e pacotes Python)
+### 1. Construir e Iniciar os Contêineres
 
-    Para instalar o Poetry, use o comando recomendado para seu sistema operacional (geralmente):
-    ```bash
-    # No macOS / Linux / WSL
-    curl -sSL https://install.python-poetry.org | python3 -
-    export PATH="$HOME/.local/bin:$PATH"
-    
-  Adicione a linha acima no seu arquivo .bashrc ou zshrc 
+Execute o seguinte comando na raiz do projeto. Este comando irá construir as imagens Docker, criar um banco de dados limpo e iniciar a aplicação.
 
-    # No Windows (PowerShell)
-    (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-    ```
-    Após a instalação, certifique-se de que o Poetry esteja no seu PATH.
+```sh
+docker-compose up --build -d
+```
 
-### Instalação e Configuração
+- A aplicação estará disponível em `http://localhost:8000`.
+- A documentação interativa (Swagger UI) estará em `http://localhost:8000/docs`.
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone [https://github.com/GilJSantana/chatbot_gsantana.git](https://github.com/GilJSantana/chatbot_gsantana.git)
-    cd chatbot_gsantana
-    ```
+---
 
-2.  **Instale as dependências usando Poetry:**
-    O Poetry criará automaticamente um ambiente virtual e instalará todas as dependências definidas no `pyproject.toml`.
-    ```bash
-    poetry install
-    ```
+## 🛠️ Primeiros Passos: Criando um Superusuário e Autenticando
 
-3.  **Ative o ambiente virtual do Poetry:**
-    ```bash
-    poetry shell
-    ```
-    *Obs: Você estará agora dentro do ambiente virtual. Todos os comandos Python a seguir usarão as dependências instaladas pelo Poetry.*
+Para interagir com os endpoints protegidos (criar, editar, deletar FAQs), você precisa primeiro criar um usuário administrador e obter um token de autenticação.
 
-4.  **Inicialize o banco de dados e adicione dados de exemplo (opcional):**
-    ```bash
-    python -c "from app import db; db.create_all()"
-    python scripts/populate_db.py # Se você tiver um script para popular o DB
-    ```
-    *Obs: Você precisará criar o `scripts/populate_db.py` ou incluir a lógica de população no `app.py` para esta etapa funcionar.*
+### 1. Criar o Superusuário
 
-5.  **Inicie a API do Chatbot:**
-    ```bash
-    flask run
-    # ou se estiver usando Gunicorn (recomendado para produção)
-    # gunicorn -w 4 app:app
-    ```
-    A API estará disponível em `http://127.0.0.1:5000` por padrão.
+O projeto inclui um script para criar um usuário administrador de forma interativa.
 
-6.  **Execute o Frontend:**
-    Abra o arquivo `frontend/index.html` (ou o nome do seu arquivo HTML principal) em seu navegador para ver a interface do chatbot. Você pode precisar de um pequeno servidor HTTP local (como `python -m http.server` na pasta `frontend` ou usar as ferramentas de desenvolvimento do seu navegador) se o seu frontend fizer requisições AJAX e tiver problemas com restrições de CORS ao abrir o arquivo diretamente.
+a. **Acesse o contêiner da API:**
+   Primeiro, encontre o nome do seu contêiner da API:
+   ```sh
+   docker-compose ps
+   ```
+   (O nome será algo como `chatbot_gsantana-api-1`)
+
+   Em seguida, acesse o terminal do contêiner:
+   ```sh
+   docker exec -it [NOME_DO_SEU_CONTAINER_API] bash
+   ```
+
+b. **Execute o script de criação:**
+   Dentro do contêiner, execute o seguinte comando:
+   ```sh
+   python /app/scripts/create_superuser.py
+   ```
+
+c. **Siga as instruções:**
+   O script pedirá seu `nome de usuário`, `email` e `senha` (com confirmação). Preencha com os dados desejados.
+
+### 2. Autenticar na API via Swagger UI
+
+a. **Acesse a documentação:**
+   Abra seu navegador e vá para `http://localhost:8000/docs`.
+
+b. **Obtenha o Token de Acesso:**
+   - Encontre a seção **`Authentication`** e expanda o endpoint `POST /api/v1/auth/token`.
+   - Clique em **"Try it out"**.
+   - Preencha os campos `username` e `password` com as credenciais que você acabou de criar.
+   - Clique em **"Execute"**.
+   - Na resposta, copie o valor completo do `access_token`.
+
+c. **Autorize o Swagger UI:**
+   - No canto superior direito da página, clique no botão **"Authorize"**.
+   - Na janela que abrir, no campo "Value", cole o token que você copiou, **prefixado com `Bearer ` e um espaço**.
+     - Exemplo: `Bearer eyJhbGciOiJIUzI1Ni...`
+   - Clique em **"Authorize"** e depois em **"Close"**.
+
+Agora você está autenticado e pode testar todos os endpoints protegidos da API diretamente pelo Swagger.
+
+### Solução de Problemas
+
+Se você encontrar problemas de autenticação ou de banco de dados, a maneira mais segura de recomeçar é apagar completamente o ambiente Docker e reconstruí-lo. Isso garante um banco de dados 100% limpo.
+
+```sh
+# Pare e apague os contêineres e os volumes de dados
+docker-compose down --volumes
+
+# Reconstrua as imagens sem usar cache e inicie os serviços
+docker-compose up --build --no-cache -d
+```
+Depois, repita o passo de criação do superusuário.
 
 ## 🧪 Testes
 
-
-Para executar os testes automatizados do projeto:
+Para executar os testes automatizados do projeto, utilize o `docker-compose` para rodar os testes no ambiente containerizado:
 
 ```bash
-poetry run pytest # Exemplo para pytest
-# ou
-poetry run python -m unittest discover # Exemplo para unittest
+docker-compose run --rm api poetry run pytest
 ```
-*Lembre-se de adicionar suas dependências de teste (ex: pytest) como dev-dependencies no seu `pyproject.toml` usando `poetry add --group dev pytest`.*
 
 ## 📄 Documentação Adicional
 
