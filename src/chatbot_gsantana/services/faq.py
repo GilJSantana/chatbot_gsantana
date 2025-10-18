@@ -11,7 +11,10 @@ class FAQService:
 
     def create_faq(self, db: Session, faq: schemas.FAQCreate) -> models.FAQ:
         """Cria uma nova FAQ e confirma a transação."""
-        return faq_repository.create_faq(db=db, faq=faq)
+        db_faq = faq_repository.create_faq(db=db, faq=faq)
+        db.commit()
+        db.refresh(db_faq)
+        return db_faq
 
     def get_faq(self, db: Session, faq_id: int) -> models.FAQ | None:
         """Busca uma FAQ pelo ID."""
@@ -28,12 +31,16 @@ class FAQService:
     ) -> models.FAQ | None:
         """Atualiza uma FAQ e confirma a transação se encontrada."""
         db_faq = faq_repository.update_faq(db=db, faq_id=faq_id, faq=faq)
+        if db_faq:
+            db.commit()
+            db.refresh(db_faq)
         return db_faq
 
     def delete_faq(self, db: Session, faq_id: int) -> bool:
         """Deleta uma FAQ e confirma a transação, retornando True se bem-sucedido."""
         deleted_faq = faq_repository.delete_faq(db=db, faq_id=faq_id)
         if deleted_faq:
+            db.commit()
             return True
         return False
 

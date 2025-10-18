@@ -47,6 +47,10 @@ class UserService:
             email=user_in.email,
             hashed_password=hashed_password,
         )
+
+        db.commit()
+        db.refresh(db_user)
+
         return db_user
 
 
