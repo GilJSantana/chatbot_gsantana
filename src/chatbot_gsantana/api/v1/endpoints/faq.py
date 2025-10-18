@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 
 from chatbot_gsantana import schemas
 from chatbot_gsantana.api import deps
@@ -16,7 +16,10 @@ def get_faqs(db: deps.SessionDep, skip: int = 0, limit: int = 100):
 @router.get("/{faq_id}", response_model=schemas.FAQ)
 def get_faq(faq_id: int, db: deps.SessionDep):
     """Busca uma FAQ pelo ID."""
-    return faq_service.get_faq(db, faq_id=faq_id)
+    db_faq = faq_service.get_faq(db, faq_id=faq_id)
+    if not db_faq:
+        raise HTTPException(status_code=404, detail="FAQ not found")
+    return db_faq
 
 
 @router.post(
@@ -28,5 +31,4 @@ def create_faq(
     faq_in: schemas.FAQCreate, db: deps.SessionDep, current_user: deps.CurrentUser
 ):
     """Cria uma nova FAQ (requer autenticação)."""
-    # CORREÇÃO: O parâmetro no serviço se chama `faq`, não `faq_in`.
     return faq_service.create_faq(db=db, faq=faq_in)
