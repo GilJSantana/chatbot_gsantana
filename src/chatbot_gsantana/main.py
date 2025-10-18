@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
-from .core.config import settings
+
 # CORREÇÃO: Importa o módulo database inteiro para garantir que o monkeypatch funcione.
 from .core import database as database_module
 
@@ -15,8 +15,7 @@ async def lifespan(app: FastAPI):
     Gerenciador de ciclo de vida para inicializar recursos na inicialização
     e limpá-los no encerramento.
     """
-    # CORREÇÃO: Usa o engine a partir do módulo para que ele possa ser substituído nos testes.
-    database_module.Base.metadata.create_all(bind=database_module.engine)
+    (database_module.Base.metadata.create_all(bind=database_module.engine))
     yield
     # Adicione aqui código para limpeza no encerramento, se necessário.
 

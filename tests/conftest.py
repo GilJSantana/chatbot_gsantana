@@ -55,6 +55,7 @@ def client(db_session: Session):
     Fixture que fornece um TestClient com a dependência de banco de dados
     sobrescrita para usar a sessão de teste.
     """
+
     def override_get_db():
         """Substitui a dependência get_db para usar a sessão de teste."""
         try:
@@ -72,7 +73,9 @@ def client(db_session: Session):
 def test_user(db_session: Session) -> User:
     """Cria um usuário de teste no banco de dados de teste."""
     hashed_password = get_password_hash("testpassword")
-    user = User(username="testuser", email="test@example.com", hashed_password=hashed_password)
+    user = User(
+        username="testuser", email="test@example.com", hashed_password=hashed_password
+    )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)

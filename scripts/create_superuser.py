@@ -38,14 +38,13 @@ def create_superuser():
             hashed_password=hashed_password,
         )
 
-        # CORREÇÃO: Confirma (commit) a transação para salvar o usuário no banco de dados.
         db.commit()
 
         logger.info(f"Superusuário '{username}' criado com sucesso!")
 
     except Exception as e:
         logger.error(f"Falha ao criar superusuário: {e}")
-        db.rollback() # Desfaz a transação em caso de erro
+        db.rollback()
     finally:
         db.close()
 
