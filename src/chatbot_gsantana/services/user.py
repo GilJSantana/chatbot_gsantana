@@ -47,11 +47,10 @@ class UserService:
             email=user_in.email,
             hashed_password=hashed_password,
         )
-        
-        # CORREÇÃO: Confirma (commit) a transação para salvar o usuário no banco de dados.
+
         db.commit()
         db.refresh(db_user)
-        
+
         return db_user
 
 

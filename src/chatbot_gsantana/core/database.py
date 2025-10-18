@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
-from .config import settings # Importa as configurações
+from .config import settings  # Importa as configurações
 
 Base = declarative_base()
 

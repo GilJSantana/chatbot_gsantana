@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # --- Schemas Base ---
@@ -34,5 +34,5 @@ class FAQ(FAQBase):
     question: str
     answer: str
 
-    class Config:
-        from_attributes = True
+    # CORREÇÃO: Substitui a 'class Config' obsoleta pela nova 'model_config'
+    model_config = ConfigDict(from_attributes=True)
