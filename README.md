@@ -36,9 +36,25 @@ Certifique-se de ter instalado:
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-### 1. Construir e Iniciar os Contêineres
+### 1. Configuração do Ambiente
 
-Execute o seguinte comando na raiz do projeto. Este comando irá construir as imagens Docker, criar um banco de dados limpo e iniciar a aplicação.
+O projeto utiliza um arquivo `.env` para gerenciar variáveis de ambiente. Isso permite que você defina suas próprias configurações de banco de dados e chaves secretas.
+
+a. **Copie o Arquivo de Exemplo:**
+   Na raiz do projeto, copie o arquivo de exemplo `.env.example` para um novo arquivo chamado `.env`.
+   ```sh
+   cp .env.example .env
+   ```
+
+b. **Preencha o Arquivo `.env`:**
+   Abra o arquivo `.env` e preencha **todas** as variáveis. Siga as instruções contidas nele para gerar a `SECRET_KEY` e defina os parâmetros do banco de dados conforme sua preferência.
+
+c. **Ignore o Arquivo `.env`:**
+   Garanta que o arquivo `.env` esteja listado no seu `.gitignore` para que seus segredos não sejam enviados para o repositório.
+
+### 2. Construir e Iniciar os Contêineres
+
+Agora, execute o seguinte comando na raiz do projeto. Ele irá construir as imagens, criar um banco de dados limpo e iniciar a aplicação, carregando as variáveis do seu arquivo `.env`.
 
 ```sh
 docker-compose up --build -d
@@ -51,7 +67,7 @@ docker-compose up --build -d
 
 ## 🛠️ Primeiros Passos: Criando um Superusuário e Autenticando
 
-Para interagir com os endpoints protegidos (criar, editar, deletar FAQs), você precisa primeiro criar um usuário administrador e obter um token de autenticação.
+Para interagir com os endpoints protegidos, você precisa primeiro criar um usuário administrador e obter um token de autenticação.
 
 ### 1. Criar o Superusuário
 
