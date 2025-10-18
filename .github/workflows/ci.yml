@@ -15,31 +15,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
-    - name: Install Poetry
-      run: pip install poetry
+      - name: Install Poetry
+        run: pip install poetry
 
-    - name: Install dependencies
-      run: poetry install --no-root
+      - name: Install dependencies
+        run: poetry install --no-root
 
-    - name: Run Black (code formatter)
-      run: poetry run black --check src tests
+      - name: Run Black (code formatter)
+        run: poetry run black --check src tests
 
-    - name: Run Flake8 (linter)
-      run: poetry run flake8 src tests
+      - name: Run Flake8 (linter)
+        run: poetry run flake8 src tests
 
-    - name: Run tests
-      run: poetry run pytest
+      - name: Run tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: poetry run pytest
 
-    - name: Build Docker image
-      run: docker build -t chatbot-gsantana-api:latest .
+      - name: Build Docker image
+        run: docker build -t chatbot-gsantana-api:latest .
 
     # Futuros passos para push da imagem para registry e deploy
     # - name: Log in to Docker Hub
