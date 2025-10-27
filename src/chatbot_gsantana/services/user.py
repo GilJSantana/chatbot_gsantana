@@ -1,9 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+import structlog
 
 from .. import models, schemas
 from ..core import security
 from ..repositories import user as user_repository
+
+log = structlog.get_logger()
 
 
 class UserService:
@@ -51,6 +54,7 @@ class UserService:
         db.commit()
         db.refresh(db_user)
 
+        log.info("user_created", user_id=db_user.id, username=db_user.username)
         return db_user
 
 

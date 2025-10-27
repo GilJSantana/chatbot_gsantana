@@ -1,52 +1,65 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
-
-# CORREÇÃO: Importa o módulo database inteiro para garantir que o monkeypatch funcione.
-from .core import database as database_module
+from .core import database, logging_config
+from .core.config import get_settings
+from .api.middleware import LoggingMiddleware
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Gerenciador de ciclo de vida para inicializar recursos na inicialização
-    e limpá-los no encerramento.
+    Gerenciador de ciclo de vida para inicializar e limpar recursos.
     """
-    (database_module.Base.metadata.create_all(bind=database_module.engine))
+    logging_config.configure_logging()
+
+    settings = get_settings()
+    # Conecta ao banco de dados e armazena a fábrica de sessões no estado da aplicação
+    app.state.db_session_factory = database.get_db_session_factory(
+        str(settings.DATABASE_URL)
+    )
+
+    # Opcional: Cria as tabelas se não estiver usando migrações como Alembic
+    # database.Base.metadata.create_all(bind=app.state.db_session_factory.kw["bind"])
+
     yield
-    # Adicione aqui código para limpeza no encerramento, se necessário.
+
+    # Opcional: Limpa recursos ao desligar
+    # if hasattr(app.state, "db_session_factory"):
+    #     engine = app.state.db_session_factory.kw["bind"]
+    #     engine.dispose()
 
 
-app = FastAPI(
-    title="Chatbot LabYes",
-    description="API para o chatbot de FAQ do LabYes",
-    version="0.1.0",
-    lifespan=lifespan,
-)
+def create_app() -> FastAPI:
+    """Fábrica de aplicação FastAPI."""
+    app = FastAPI(
+        title="Chatbot LabYes",
+        description="API para o chatbot de FAQ do LabYes",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
 
-# --- Configuração do CORS ---
-origins = [
-    "http://localhost",
-    "http://localhost:80",
-]
+    app.add_middleware(LoggingMiddleware)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    origins = ["http://localhost", "http://localhost:80"]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-# --- Inclusão dos Roteadores ---
-# O prefixo da API é definido diretamente para evitar o erro de configuração nos testes.
-app.include_router(api_router, prefix="/api/v1")
+    app.include_router(api_router, prefix="/api/v1")
+
+    @app.get("/health-check")
+    def health_check():
+        return {"status": "ok"}
+
+    return app
 
 
-@app.get("/health-check")
-def health_check():
-    """Endpoint simples para verificar a saúde da aplicação."""
-    return {"status": "ok"}
+# Cria a aplicação principal para execução normal (não para testes)
+app = create_app()

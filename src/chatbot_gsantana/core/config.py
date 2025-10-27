@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Optional, Union
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -10,8 +11,6 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # --- Configurações de Segurança ---
-    # CORREÇÃO: A chave secreta agora deve ser carregada do ambiente.
-    # Não deve ser gerada dinamicamente.
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -23,11 +22,16 @@ class Settings(BaseSettings):
     POSTGRES_DB: Optional[str] = None
 
     # --- URL do Banco de Dados ---
-    # Pode ser definida diretamente ou construída a partir das variáveis do Postgres.
-    # O padrão é um banco SQLite para desenvolvimento local e testes.
     DATABASE_URL: Union[str, None] = "sqlite:///./test_db.db"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    # Por padrão, Pydantic's BaseSettings irá carregar variáveis de um arquivo .env
+    # se python-dotenv estiver instalado. Para testes, pytest-dotenv irá carregar o
+    # arquivo .env.test especificado no ambiente, e as variáveis de ambiente
+    # têm maior prioridade do que os valores de um arquivo .env.
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 
-settings = Settings()
+@lru_cache()
+def get_settings() -> Settings:
+    """Retorna uma instância cacheada das configurações."""
+    return Settings()

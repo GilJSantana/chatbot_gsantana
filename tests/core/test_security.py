@@ -3,7 +3,7 @@ from datetime import timedelta
 from jose import jwt
 
 from chatbot_gsantana.core import security
-from chatbot_gsantana.core.config import settings
+from chatbot_gsantana.core.config import get_settings
 
 
 def test_password_hashing():
@@ -15,6 +15,7 @@ def test_password_hashing():
 
 
 def test_create_access_token():
+    settings = get_settings()
     data = {"sub": "testuser"}
     expires_delta = timedelta(minutes=15)
     token = security.create_access_token(data, expires_delta=expires_delta)

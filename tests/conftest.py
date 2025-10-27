@@ -1,77 +1,66 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
-from pytest import MonkeyPatch
+from sqlalchemy.orm import Session, sessionmaker
+from typing import Generator
 
-# Importa o módulo 'database' para que possamos substituir seus objetos
-from chatbot_gsantana.core import database as database_module
-from chatbot_gsantana.main import app
-from chatbot_gsantana.core.database import Base, get_db
-from chatbot_gsantana.models.user import User
-from chatbot_gsantana.core.security import get_password_hash
-
-# 1. Engine de teste que usa um banco de dados SQLite em memória
-test_engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-
-# 2. Fábrica de sessões de teste que usa o engine de teste
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
-
-
-@pytest.fixture(autouse=True)
-def override_db_for_tests(monkeypatch: MonkeyPatch):
-    """
-    Fixture de execução automática que garante que QUALQUER teste que importe
-    a aplicação use o banco de dados de teste.
-    Esta é a correção definitiva para o problema de ordem de importação.
-    """
-    monkeypatch.setattr(database_module, "engine", test_engine)
-    monkeypatch.setattr(database_module, "SessionLocal", TestingSessionLocal)
+from chatbot_gsantana.core.database import Base, get_db_session_factory, get_db
+from chatbot_gsantana.main import create_app
 
 
 @pytest.fixture(scope="function")
-def db_session():
+def db_session() -> Generator[Session, None, None]:
     """
-    Cria as tabelas, fornece uma sessão de banco de dados de teste e
-    depois apaga as tabelas para garantir um estado limpo.
+    Fixture que conecta ao banco de dados de teste (SQLite em memória),
+    cria as tabelas, fornece uma sessão e depois limpa tudo.
     """
+    # Garante que a URL do banco de dados de teste seja usada
+    test_database_url = "sqlite:///./test.db"
+
+    # Cria um engine e uma SessionLocal específicos para o teste
+    test_engine = create_engine(test_database_url, pool_pre_ping=True)
+    TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
     Base.metadata.create_all(bind=test_engine)
-    db = TestingSessionLocal()
+    db = TestSessionLocal()
     try:
         yield db
     finally:
         db.close()
         Base.metadata.drop_all(bind=test_engine)
+        test_engine.dispose()
 
 
 @pytest.fixture(scope="function")
-def client(db_session: Session):
+def client(db_session: Session) -> Generator[TestClient, None, None]:
     """
-    Fixture que fornece um TestClient com a dependência de banco de dados
-    sobrescrita para usar a sessão de teste.
+    Cria um TestClient com uma aplicação limpa para cada teste,
+    sobrescrevendo a dependência do banco de dados com a sessão de teste.
     """
+    app = create_app()
 
-    def override_get_db():
-        """Substitui a dependência get_db para usar a sessão de teste."""
-        try:
-            yield db_session
-        finally:
-            db_session.close()
+    # Configura o estado da aplicação para usar a fábrica de sessões de teste
+    # Isso é crucial para que o lifespan da aplicação não tente criar um novo engine
+    test_database_url = "sqlite:///./test.db"
+    app.state.db_session_factory = get_db_session_factory(test_database_url)
+
+    def override_get_db() -> Generator[Session, None, None]:
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
+
     with TestClient(app) as c:
         yield c
+
     app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
-def test_user(db_session: Session) -> User:
+def test_user(db_session: Session):
     """Cria um usuário de teste no banco de dados de teste."""
+    from chatbot_gsantana.models.user import User
+    from chatbot_gsantana.core.security import get_password_hash
+
     hashed_password = get_password_hash("testpassword")
     user = User(
         username="testuser", email="test@example.com", hashed_password=hashed_password
@@ -83,10 +72,10 @@ def test_user(db_session: Session) -> User:
 
 
 @pytest.fixture(scope="function")
-def auth_headers(client: TestClient, test_user: User) -> dict[str, str]:
+def auth_headers(client: TestClient, test_user) -> dict[str, str]:
     """Gera cabeçalhos de autenticação para um usuário de teste."""
     login_data = {"username": test_user.username, "password": "testpassword"}
     response = client.post("/api/v1/auth/token", data=login_data)
-    assert response.status_code == 200, f"Failed to get token: {response.json()}"
+    assert response.status_code == 200, f"Falha ao obter token: {response.json()}"
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
