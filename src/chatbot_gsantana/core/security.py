@@ -4,7 +4,7 @@ from typing import Any
 from jose import jwt
 from passlib.context import CryptContext
 
-from .config import settings
+from .config import get_settings
 
 # CORREÇÃO: Usa argon2 como o algoritmo de hashing padrão, que é mais moderno e robusto.
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -22,6 +22,7 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Cria um token de acesso JWT."""
+    settings = get_settings()
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
