@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.v1.api import api_router
 from .core import database, logging_config
-from .core.config import get_settings
+from .core.config import get_settings, Settings
 from .api.middleware import LoggingMiddleware
 
 
@@ -15,31 +15,35 @@ async def lifespan(app: FastAPI):
     """
     logging_config.configure_logging()
 
-    settings = get_settings()
-    # Conecta ao banco de dados e armazena a fábrica de sessões no estado da aplicação
-    app.state.db_session_factory = database.get_db_session_factory(
-        str(settings.DATABASE_URL)
-    )
+    # As configurações devem estar sempre disponíveis em app.state.settings
+    settings = app.state.settings
 
-    # Opcional: Cria as tabelas se não estiver usando migrações como Alembic
-    # database.Base.metadata.create_all(bind=app.state.db_session_factory.kw["bind"])
+    # Conecta ao banco de dados e armazena a fábrica de sessões no estado da aplicação
+    session_factory = database.get_db_session_factory(str(settings.DATABASE_URL))
+    app.state.db_session_factory = session_factory
+
+    # A criação de tabelas deve ser gerenciada por uma ferramenta de migração (Alembic)
+    # e não pela aplicação em tempo de execução. Comentando esta linha.
+    engine = session_factory.kw["bind"]
+    database.Base.metadata.create_all(bind=engine)
 
     yield
 
-    # Opcional: Limpa recursos ao desligar
-    # if hasattr(app.state, "db_session_factory"):
-    #     engine = app.state.db_session_factory.kw["bind"]
-    #     engine.dispose()
 
-
-def create_app() -> FastAPI:
-    """Fábrica de aplicação FastAPI."""
+def create_app(settings: Settings | None = None) -> FastAPI:
+    """
+    Fábrica de aplicação FastAPI.
+    Se `settings` for fornecido, usa-o; caso contrário, carrega as configurações padrão.
+    """
     app = FastAPI(
         title="Chatbot LabYes",
         description="API para o chatbot de FAQ do LabYes",
         version="0.1.0",
         lifespan=lifespan,
     )
+
+    # Armazena as configurações no estado da aplicação para acesso posterior
+    app.state.settings = settings if settings else get_settings()
 
     app.add_middleware(LoggingMiddleware)
 

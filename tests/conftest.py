@@ -4,8 +4,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Generator
 
-from chatbot_gsantana.core.database import Base, get_db_session_factory, get_db
+from chatbot_gsantana.core.config import get_settings, Settings
+from chatbot_gsantana.core.database import Base, get_db
 from chatbot_gsantana.main import create_app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def clear_settings_cache_for_tests():
+    """
+    Limpa o cache da função get_settings() antes de iniciar a sessão de testes.
+    Isso garante que as configurações de teste sejam recarregadas corretamente.
+    """
+    get_settings.cache_clear()
 
 
 @pytest.fixture(scope="function")
@@ -35,29 +45,33 @@ def db_session() -> Generator[Session, None, None]:
 def client(db_session: Session) -> Generator[TestClient, None, None]:
     """
     Cria um TestClient com uma aplicação limpa para cada teste,
-    sobrescrevendo a dependência do banco de dados com a sessão de teste.
+    sobrescrevendo as dependências do banco de dados e configurações.
     """
-    app = create_app()
+    # 1. Cria uma instância de Settings para o ambiente de teste
+    test_settings = Settings(DATABASE_URL="sqlite:///./test.db")
 
-    # Configura o estado da aplicação para usar a fábrica de sessões de teste
-    # Isso é crucial para que o lifespan da aplicação não tente criar um novo engine
-    test_database_url = "sqlite:///./test.db"
-    app.state.db_session_factory = get_db_session_factory(test_database_url)
+    # 2. Cria a aplicação, passando as configurações de teste diretamente
+    app = create_app(settings=test_settings)
 
+    # 3. Sobrescreve a dependência get_db para usar a sessão de teste
     def override_get_db() -> Generator[Session, None, None]:
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
+    # 4. Inicia o TestClient
     with TestClient(app) as c:
         yield c
 
+    # 5. Limpa os overrides após o teste
     app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
 def test_user(db_session: Session):
-    """Cria um usuário de teste no banco de dados de teste."""
+    """
+    Cria um usuário de teste no banco de dados de teste.
+    """
     from chatbot_gsantana.models.user import User
     from chatbot_gsantana.core.security import get_password_hash
 
@@ -73,7 +87,9 @@ def test_user(db_session: Session):
 
 @pytest.fixture(scope="function")
 def auth_headers(client: TestClient, test_user) -> dict[str, str]:
-    """Gera cabeçalhos de autenticação para um usuário de teste."""
+    """
+    Gera cabeçalhos de autenticação para um usuário de teste.
+    """
     login_data = {"username": test_user.username, "password": "testpassword"}
     response = client.post("/api/v1/auth/token", data=login_data)
     assert response.status_code == 200, f"Falha ao obter token: {response.json()}"
