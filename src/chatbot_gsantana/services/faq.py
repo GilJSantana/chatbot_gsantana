@@ -1,6 +1,9 @@
+import structlog
 from sqlalchemy.orm import Session
 
 from ..repositories.faq import FaqRepository
+
+logger = structlog.get_logger(__name__)
 
 
 class FaqService:
@@ -14,13 +17,18 @@ class FaqService:
     def get_answer_for_question(self, db: Session, question_text: str) -> str | None:
         """
         Busca a melhor resposta para uma dada pergunta.
-
-        NOTA: A lógica atual é uma simulação simples. Uma implementação real
-        usaria busca por similaridade de vetores (vector search) com embeddings
-        de texto para encontrar a pergunta mais semanticamente similar.
         """
+        log = logger.bind(question=question_text)
+        log.info("service.faq.get_answer.start")
+
         faq = self.repository.find_by_question_exact(db, question_text)
-        return faq.answer if faq else None
+        
+        if faq:
+            log.info("service.faq.get_answer.found", faq_id=faq.id)
+            return faq.answer
+        else:
+            log.info("service.faq.get_answer.not_found")
+            return None
 
 
 # Função de dependência para o FastAPI
