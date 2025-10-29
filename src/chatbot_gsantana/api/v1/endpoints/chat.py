@@ -1,29 +1,23 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from ....schemas.faq import (
-    Question,
-    Answer,
-)  # CORREÇÃO: Importa Question e Answer diretamente
+from .... import schemas
 from ....api import deps
-from ....services.faq import faq_service
+from ....fsm.perfil import PerfilChatFSM, get_fsm
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Answer)  # Usa Answer diretamente
-def ask_question(question: Question, db: Session = Depends(deps.get_db)):
+@router.post("/", response_model=schemas.ChatResponse)
+def handle_chat_message(
+    chat_in: schemas.ChatMessage,
+    db: deps.SessionDep,
+    fsm: PerfilChatFSM = Depends(get_fsm),
+):
     """
-    Recebe uma pergunta do usuário e retorna a melhor resposta encontrada.
+    Ponto de entrada principal para as mensagens do chat.
     """
-    # A lógica de busca será implementada no faq_service em breve.
-    answer = faq_service.get_answer_for_question(db=db, question_text=question.question)
+    response_text = fsm.handle_message(
+        session_id=chat_in.session_id, message=chat_in.message, db=db
+    )
 
-    if not answer:
-        # Se nenhuma resposta for encontrada, retorna uma mensagem padrão.
-        return Answer(
-            answer="Desculpe, não encontrei uma resposta para essa pergunta. "
-            "Tente reformular."
-        )
-
-    return Answer(answer=answer)
+    return schemas.ChatResponse(reply=response_text)
