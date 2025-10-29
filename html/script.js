@@ -10,6 +10,17 @@ const welcomeBubble = document.getElementById('welcomeBubble');
 let welcomeBubbleTimeout;
 let inactivityTimer;
 
+// --- Funções de Gerenciamento de Sessão e Estado ---
+
+function getOrSetSessionId() {
+    let sessionId = localStorage.getItem('chatbot_session_id');
+    if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        localStorage.setItem('chatbot_session_id', sessionId);
+    }
+    return sessionId;
+}
+
 // --- Funções do Chat ---
 
 function addMessage(sender, text, isHtml = false) {
@@ -44,22 +55,17 @@ function removeTypingIndicator(indicatorId) {
     }
 }
 
-async function handleUserMessage(message) {
-    // 1. Adiciona a mensagem do usuário à interface
-    addMessage('user', message);
-    chatInput.value = '';
-
-    // 2. Mostra o indicador de "digitando..."
+async function sendMessageToApi(message) {
+    const sessionId = getOrSetSessionId();
     const typingIndicatorId = showTypingIndicator();
 
     try {
-        // 3. Envia a pergunta para a API no endpoint correto com a barra final
-        const response = await fetch('/api/v1/chat/', { // CORREÇÃO: Adicionada a barra final
+        const response = await fetch('/api/v1/chat/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ question: message }),
+            body: JSON.stringify({ session_id: sessionId, message: message }),
         });
 
         if (!response.ok) {
@@ -67,31 +73,39 @@ async function handleUserMessage(message) {
         }
 
         const data = await response.json();
-        const botResponse = data.answer; // Assumindo que a API retorna { "answer": "..." }
+        const botResponse = data.reply; // CORREÇÃO: Usa "reply" em vez de "answer"
 
-        // 4. Remove o indicador e exibe a resposta da API
         removeTypingIndicator(typingIndicatorId);
         addMessage('bot', botResponse);
 
     } catch (error) {
         console.error('Erro ao contatar a API:', error);
-        // 5. Remove o indicador e exibe uma mensagem de erro
         removeTypingIndicator(typingIndicatorId);
         addMessage('bot', 'Desculpe, estou com problemas para me conectar. Tente novamente mais tarde.');
     }
 }
 
+function handleUserMessage() {
+    const message = chatInput.value.trim();
+    if (message) {
+        addMessage('user', message);
+        chatInput.value = '';
+        sendMessageToApi(message);
+    }
+}
+
 // --- Funções de UI e Estado ---
 
-function openChatWindow() {
+async function openChatWindow() {
     chatbotWindow.classList.add('open');
     chatbotIconContainer.style.display = 'none';
     clearTimeout(welcomeBubbleTimeout);
     welcomeBubble.style.opacity = '0';
     welcomeBubble.style.visibility = 'hidden';
 
+    // Se o chat estiver vazio, inicia a conversa com a FSM
     if (chatBody.children.length === 0) {
-        addMessage('bot', "Olá! Como posso ajudar você hoje?");
+        await sendMessageToApi("Olá"); // Inicia o fluxo de onboarding
     }
 }
 
@@ -127,16 +141,11 @@ chatbotIconContainer.addEventListener('click', openChatWindow);
 closeChat.addEventListener('click', closeChatWindow);
 minimizeChat.addEventListener('click', closeChatWindow);
 
-sendMessageBtn.addEventListener('click', () => {
-    const message = chatInput.value.trim();
-    if (message) {
-        handleUserMessage(message);
-    }
-});
+sendMessageBtn.addEventListener('click', handleUserMessage);
 
 chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        sendMessageBtn.click();
+        handleUserMessage();
     }
 });
 
