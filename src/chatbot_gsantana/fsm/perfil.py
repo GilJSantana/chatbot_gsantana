@@ -5,8 +5,9 @@ import structlog
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from ..services.voluntario import VoluntarioService, get_voluntario_service
-from ..services.faq import FaqService, get_faq_service
+from ..core.database import get_db
+from ..services.voluntario import VoluntarioService
+from ..services.faq import FaqService
 from ..models.voluntario import Voluntario
 
 # Inicializa o logger para este módulo
@@ -44,17 +45,23 @@ class PerfilChatFSM:
     Máquina de Estados Finitos para gerenciar o fluxo de onboarding e delegar para o FAQ.
     """
 
-    def __init__(self, voluntario_service: VoluntarioService, faq_service: FaqService):
+    def __init__(
+        self,
+        voluntario_service: VoluntarioService = Depends(),
+        faq_service: FaqService = Depends(),
+        db: Session = Depends(get_db)
+    ):
         self.voluntario_service = voluntario_service
         self.faq_service = faq_service
+        self.db = db
 
-    def handle_message(self, session_id: str, message: str, db: Session) -> str:
+    def handle_message(self, session_id: str, message: str) -> str:
         """Processa a mensagem do usuário com base no estado atual da conversa."""
         log = logger.bind(session_id=session_id)
 
         if session_id not in _user_states:
             log.info("fsm.session.new", message="Nova sessão detectada, verificando perfil existente.")
-            perfil_existente = self.voluntario_service.repository.get_by_session_id(db, session_id)
+            perfil_existente = self.voluntario_service.repository.get_by_session_id(self.db, session_id)
             if perfil_existente:
                 _user_states[session_id] = {"state": State.READY_TO_CHAT, "data": {}}
                 log.info("fsm.onboarding.skip", message="Perfil existente encontrado, pulando para o modo de chat.")
@@ -68,13 +75,13 @@ class PerfilChatFSM:
 
         if current_state == State.READY_TO_CHAT:
             log.info("fsm.delegation.faq", message="Delegando para o serviço de FAQ.")
-            answer = self.faq_service.get_answer_for_question(db=db, question_text=message)
+            answer = self.faq_service.get_answer_for_question(question_text=message)
             return answer or "Não encontrei uma resposta para sua pergunta. Tente de outra forma."
 
-        response = self._handle_onboarding_message(session_id, message, current_state, db, log)
+        response = self._handle_onboarding_message(session_id, message, current_state, log)
         return response
 
-    def _handle_onboarding_message(self, session_id: str, message: str, current_state: State, db: Session, log: structlog.BoundLogger) -> str:
+    def _handle_onboarding_message(self, session_id: str, message: str, current_state: State, log: structlog.BoundLogger) -> str:
         """Lógica de tratamento de mensagens durante o onboarding."""
         
         next_state = None
@@ -106,7 +113,6 @@ class PerfilChatFSM:
             
             user_data = _user_states[session_id]["data"]
             self.voluntario_service.persistir_perfil_voluntario(
-                db=db,
                 session_id=session_id,
                 nome=user_data["nome"],
                 local=user_data["local"],
@@ -122,12 +128,3 @@ class PerfilChatFSM:
             _user_states[session_id]["state"] = next_state
 
         return response
-
-def get_fsm(
-    vol_service: VoluntarioService = Depends(get_voluntario_service),
-    faq_service_instance: FaqService = Depends(get_faq_service),
-) -> PerfilChatFSM:
-    """
-    Dependência do FastAPI que cria e fornece uma instância de PerfilChatFSM com todas as suas dependências.
-    """
-    return PerfilChatFSM(voluntario_service=vol_service, faq_service=faq_service_instance)

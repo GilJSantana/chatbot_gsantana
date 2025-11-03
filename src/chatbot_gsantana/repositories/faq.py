@@ -5,14 +5,11 @@ from ..schemas.faq import FAQCreate, FAQUpdate
 
 
 class FaqRepository:
-    """
-    Encapsula a lógica de acesso a dados para o modelo FAQ.
-    """
 
     def create_faq(self, db: Session, faq: FAQCreate) -> FAQ:
         db_faq = FAQ(question=faq.question, answer=faq.answer)
         db.add(db_faq)
-        db.flush()
+        db.commit()
         db.refresh(db_faq)
         return db_faq
 
@@ -23,9 +20,9 @@ class FaqRepository:
         return db.query(FAQ).offset(skip).limit(limit).all()
 
     def find_by_question_exact(self, db: Session, question_text: str) -> FAQ | None:
-        """Busca uma FAQ pela pergunta exata (case-insensitive)."""
-        # A implementação de case-insensitive pode variar com o DB,
-        # aqui usamos lower() que funciona bem em PostgreSQL e SQLite.
+        return db.query(FAQ).filter(FAQ.question.ilike(question_text)).first()
+    
+    def find_by_question(self, db: Session, question_text: str) -> FAQ | None:
         return db.query(FAQ).filter(FAQ.question.ilike(f"%{question_text}%")).first()
 
     def update_faq(self, db: Session, faq_id: int, faq: FAQUpdate) -> FAQ | None:
@@ -33,7 +30,7 @@ class FaqRepository:
         if db_faq:
             db_faq.question = faq.question
             db_faq.answer = faq.answer
-            db.flush()
+            db.commit()
             db.refresh(db_faq)
         return db_faq
 
@@ -41,9 +38,12 @@ class FaqRepository:
         db_faq = self.get_faq(db, faq_id)
         if db_faq:
             db.delete(db_faq)
-            db.flush()
+            db.commit()
         return db_faq
-
-
-# Instância singleton para ser usada por padrão, mas permitindo override.
-faq_repository = FaqRepository()
+    
+    def delete_faq_by_question(self, db: Session, question: str) -> FAQ | None:
+        db_faq = self.find_by_question_exact(db, question)
+        if db_faq:
+            db.delete(db_faq)
+            db.commit()
+        return db_faq
