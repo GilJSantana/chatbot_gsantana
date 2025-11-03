@@ -1,42 +1,35 @@
-from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, Generator, Optional
+from sqlalchemy import create_engine, Engine
+from sqlalchemy.orm import sessionmaker, Session, declarative_base # Importa declarative_base do lugar certo
+from fastapi import Depends, Request # Importa Request
 
-from fastapi import Depends, Request
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker, declarative_base
-
+# Base para os modelos declarativos do SQLAlchemy
 Base = declarative_base()
 
-
-# As variáveis globais foram removidas para evitar
-# condições de corrida na inicialização.
-# engine = None
-# SessionLocal = None
-
-
-def get_db_session_factory(db_url: str) -> sessionmaker:
-    """Cria e retorna uma fábrica de sessões para a URL do banco de dados fornecida."""
-    engine = create_engine(db_url, pool_pre_ping=True)
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db(request: Request) -> Generator[Session, None, None]:
+def get_db_session_factory(database_url: Optional[str] = None, existing_engine: Optional[Engine] = None):
     """
-    Dependência do FastAPI que fornece uma
-    sessão de banco de dados a partir do estado da aplicação.
+    Retorna uma fábrica de sessões do SQLAlchemy.
+    Se um existing_engine for fornecido, usa-o. Caso contrário, cria um novo com a database_url.
     """
-    session_factory = getattr(request.app.state, "db_session_factory", None)
-    if session_factory is None:
-        raise RuntimeError(
-            "Fábrica de sessão de banco de dados não encontrada no estado da aplicação."
-        )
+    if existing_engine is None:
+        if database_url is None:
+            raise ValueError("Either database_url or existing_engine must be provided.")
+        engine = create_engine(database_url, pool_pre_ping=True)
+    else:
+        engine = existing_engine
+    
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return SessionLocal
 
+def get_db(request: Request) -> Generator[Session, None, None]: # Injeta Request
+    """
+    Dependência para obter uma sessão de banco de dados.
+    """
+    session_factory = request.app.state.db_session_factory
     db = session_factory()
     try:
         yield db
     finally:
         db.close()
 
-
-# Dependência anotada para injeção mais limpa nas rotas.
 SessionDep = Annotated[Session, Depends(get_db)]

@@ -17,7 +17,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./.env
+      - ./.env.e2e
     depends_on:
       db:
         condition: service_healthy
@@ -25,16 +25,18 @@ services:
   db:
     image: postgres:15-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_temp:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ./.env.e2e
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      # CORREÇÃO: Conecta ao banco de dados 'postgres' padrão para a verificação,
+      # que sempre existe, evitando a condição de corrida.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
-  postgres_data:
+  postgres_data_temp:
