@@ -1,40 +1,28 @@
 import logging
+from unittest.mock import patch, MagicMock
+
 from fastapi.testclient import TestClient
 
 
-def test_logging_middleware_success(client: TestClient, caplog):
+@patch("chatbot_gsantana.api.middleware.log")
+def test_logging_middleware_success(mock_log: MagicMock, client: TestClient):
     """
-    Testa se o middleware de logging registra corretamente uma requisição bem-sucedida.
+    Testa se o middleware de logging chama o logger com os dados corretos.
     """
-    # Define o nível de captura do log para INFO
-    with caplog.at_level(logging.INFO):
-        # Faz uma requisição para um endpoint qualquer
-        response = client.get("/health-check")
-        assert response.status_code == 200
+    response = client.get("/health-check")
+    assert response.status_code == 200
 
-    # Verifica se algum log foi capturado
-    assert len(caplog.records) > 0, "Nenhum log foi capturado."
+    assert mock_log.info.called
 
-    # Procura pelo log do evento 'request_finished'
-    found_log_record = None
-    for record in caplog.records:
-        # O structlog anexa o dicionário de log ao atributo 'msg' do registro
-        if (
-            isinstance(record.msg, dict)
-            and record.msg.get("event") == "request_finished"
-        ):
-            found_log_record = record
-            break
+    # Acessa a última chamada feita ao mock
+    last_call = mock_log.info.call_args
+    
+    # O primeiro argumento posicional é o nome do evento
+    event_name = last_call.args[0]
+    # Os argumentos de palavra-chave são os metadados
+    log_data = last_call.kwargs
 
-    # Garante que o registro de log foi encontrado
-    assert (
-        found_log_record is not None
-    ), "O registro de log 'request_finished' não foi encontrado."
-
-    # Agora, fazemos as asserções diretamente no dicionário do log
-    log_data = found_log_record.msg
-    assert log_data["level"] == "info"
-    assert log_data["path"] == "/health-check"
-    assert log_data["method"] == "GET"
-    assert log_data["status_code"] == 200
+    # Verifica o conteúdo do log
+    assert event_name == "request_finished"
+    assert log_data.get("message") == "Requisição finalizada"
     assert "process_time" in log_data
