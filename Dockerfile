@@ -6,23 +6,34 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src
 
-# 3. Set Workdir
-WORKDIR /app
-
-# 4. Install Poetry
+# 3. Install Poetry FIRST
 RUN pip install poetry
 
-# 5. Copy dependency files and install dependencies
+# 4. Configure Poetry to create the venv inside the project
+RUN poetry config virtualenvs.in-project true
+
+# 5. Set Workdir
+WORKDIR /app
+
+# 6. Copy dependency files
 COPY pyproject.toml poetry.lock* /app/
 
-# Configure poetry to not create virtual envs and install
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --without dev
+# 7. Install dependencies (including dev dependencies for testing)
+RUN poetry install --no-root --only main,dev
 
-# 6. Copy application code
+# 8. Add the venv to the PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
+# 9. CORREÇÃO: Instala as dependências do sistema e os navegadores com o comando oficial do Playwright
+RUN playwright install --with-deps
+
+# 10. Copy application code
 COPY ./src /app/src
 COPY ./scripts /app/scripts
+COPY ./tests /app/tests
+COPY pytest.ini /app/pytest.ini
 
-# 7. Expose port and run server
+# 11. Expose port
 EXPOSE 8000
-CMD ["uvicorn", "src.chatbot_gsantana.main:app", "--host", "0.0.0.0", "--port", "8000", "--lifespan", "on"]
+
+# O CMD foi removido, pois o comando será definido no docker-compose.yml

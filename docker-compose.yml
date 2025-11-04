@@ -11,7 +11,8 @@ services:
 
   api:
     build: .
-    command: uvicorn src.chatbot_gsantana.main:app --host 0.0.0.0 --port 8000 --reload --app-dir /app
+    # CORREÇÃO: Comando simplificado, pois o uvicorn está no PATH da imagem
+    command: uvicorn src.chatbot_gsantana.main:app --host 0.0.0.0 --port 8000
     volumes:
       - ./src:/app/src
     ports:
@@ -31,8 +32,6 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      # CORREÇÃO: Conecta ao banco de dados 'postgres' padrão para a verificação,
-      # que sempre existe, evitando a condição de corrida.
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d postgres"]
       interval: 5s
       timeout: 5s
