@@ -2,7 +2,8 @@ import structlog
 
 from chatbot_gsantana.core.config import get_settings
 from chatbot_gsantana.core.database import get_db_session_factory, Base
-from chatbot_gsantana.services.user import get_user_service
+from chatbot_gsantana.services.user import UserService
+from chatbot_gsantana.repositories.user import UserRepository  # Importa UserRepository
 
 logger = structlog.get_logger(__name__)
 
@@ -24,8 +25,11 @@ def main() -> None:
             username=settings.TEST_ADMIN_USERNAME,
         )
         with session_factory() as db:
-            user_service = get_user_service()
-            user_service.get_or_create_admin_user(db, settings)
+            # Instancia UserRepository e UserService manualmente
+            user_repo = UserRepository()
+            user_service = UserService(repository=user_repo, db=db)
+            user_service.get_or_create_admin_user(settings)
+            db.commit()  # Confirma a transação para salvar o usuário
         logger.info("Initial admin user created.")
 
     logger.info("Service initialization finished.")
