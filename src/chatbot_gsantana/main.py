@@ -1,11 +1,18 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine
 
 from .api.v1.api import api_router
 from .core import database, logging_config
-from .core.config import get_settings, Settings
+from .core.config import get_settings
 from .api.middleware import LoggingMiddleware
+from .core.database import Base
+from .services.user import UserService  # Importa a classe UserService
+from .repositories.user import UserRepository  # Importa UserRepository
+
+# Engine global para ser usado com SQLite em memória
+engine = None
 
 
 @asynccontextmanager
@@ -13,27 +20,39 @@ async def lifespan(app: FastAPI):
     """
     Gerenciador de ciclo de vida para inicializar e limpar recursos.
     """
+    global engine
     logging_config.configure_logging()
 
-    # As configurações devem estar sempre disponíveis em app.state.settings
-    settings = app.state.settings
+    settings = get_settings()
 
-    # Conecta ao banco de dados e armazena a fábrica de sessões no estado da aplicação
-    session_factory = database.get_db_session_factory(str(settings.DATABASE_URL))
+    if settings.TEST_MODE:
+        if engine is None:
+            engine = create_engine(
+                str(settings.DATABASE_URL), connect_args={"check_same_thread": False}
+            )
+        session_factory = database.get_db_session_factory(existing_engine=engine)
+        Base.metadata.create_all(bind=engine)
+    else:
+        session_factory = database.get_db_session_factory(str(settings.DATABASE_URL))
+        engine = session_factory.kw["bind"]
+        Base.metadata.create_all(bind=engine)
+
     app.state.db_session_factory = session_factory
 
-    # A criação de tabelas deve ser gerenciada por uma ferramenta de migração (Alembic)
-    # e não pela aplicação em tempo de execução. Comentando esta linha.
-    engine = session_factory.kw["bind"]
-    database.Base.metadata.create_all(bind=engine)
+    if settings.TEST_ADMIN_USERNAME:
+        with session_factory() as db:
+            # Instancia UserRepository e UserService manualmente para o lifespan
+            user_repo = UserRepository()
+            user_service = UserService(repository=user_repo, db=db)
+            user_service.get_or_create_admin_user(settings=settings)
+            db.commit()
 
     yield
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app() -> FastAPI:
     """
     Fábrica de aplicação FastAPI.
-    Se `settings` for fornecido, usa-o; caso contrário, carrega as configurações padrão.
     """
     app = FastAPI(
         title="Chatbot LabYes",
@@ -41,9 +60,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
-
-    # Armazena as configurações no estado da aplicação para acesso posterior
-    app.state.settings = settings if settings else get_settings()
 
     app.add_middleware(LoggingMiddleware)
 
@@ -65,5 +81,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-# Cria a aplicação principal para execução normal (não para testes)
 app = create_app()
