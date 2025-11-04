@@ -1,61 +1,51 @@
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
 import structlog
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
-from .. import models, schemas
-from ..core import security
-from ..repositories import user as user_repository
+from ..core.config import Settings
+from ..core.database import get_db
+from ..core.security import get_password_hash, verify_password
+from ..models.user import User
+from ..repositories.user import UserRepository
 
-log = structlog.get_logger()
+logger = structlog.get_logger(__name__)
 
 
 class UserService:
-    """Camada de serviço para a lógica de negócio dos usuários."""
 
-    def authenticate_user(
-        self, db: Session, *, username: str, password: str
-    ) -> models.User | None:
-        """Autentica um usuário."""
-        user = user_repository.get_user_by_username(db, username=username)
-        if not user:
+    def __init__(
+        self, repository: UserRepository = Depends(), db: Session = Depends(get_db)
+    ):
+        self.repository = repository
+        self.db = db
+
+    def create_user(self, user_data: dict) -> User:
+        log = logger.bind(username=user_data["username"])
+        log.info("service.user.create.start")
+        user_data["hashed_password"] = get_password_hash(user_data.pop("password"))
+        db_user = User(**user_data)
+        saved_user = self.repository.save(self.db, db_user)
+        log.info("service.user.create.success", user_id=saved_user.id)
+        return saved_user
+
+    def authenticate_user(self, username: str, password: str) -> User | None:
+        db_user = self.repository.get_user_by_username(self.db, username=username)
+        if not db_user or not verify_password(password, db_user.hashed_password):
             return None
-        if not security.verify_password(password, user.hashed_password):
-            return None
-        return user
-
-    def create_user(self, db: Session, *, user_in: schemas.UserCreate) -> models.User:
-        """
-        Cria um novo usuário após validar se o username e email já existem.
-        """
-        db_user_by_username = user_repository.get_user_by_username(
-            db, username=user_in.username
-        )
-        if db_user_by_username:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already registered",
-            )
-
-        db_user_by_email = user_repository.get_user_by_email(db, email=user_in.email)
-        if db_user_by_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered",
-            )
-
-        hashed_password = security.get_password_hash(user_in.password)
-        db_user = user_repository.create_user(
-            db,
-            username=user_in.username,
-            email=user_in.email,
-            hashed_password=hashed_password,
-        )
-
-        db.commit()
-        db.refresh(db_user)
-
-        log.info("user_created", user_id=db_user.id, username=db_user.username)
         return db_user
 
-
-user_service = UserService()
+    def get_or_create_admin_user(self, settings: Settings) -> User:
+        admin_username = settings.TEST_ADMIN_USERNAME
+        admin_user = self.repository.get_user_by_username(
+            self.db, username=admin_username
+        )
+        if not admin_user:
+            logger.info("service.user.admin.creating", username=admin_username)
+            user_data = {
+                "username": admin_username,
+                "email": settings.TEST_ADMIN_EMAIL,
+                "password": settings.TEST_ADMIN_PASSWORD,
+                "is_superuser": True,
+            }
+            return self.create_user(user_data)
+        return admin_user

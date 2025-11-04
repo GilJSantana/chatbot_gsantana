@@ -5,22 +5,20 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from .... import schemas
-from ....api import deps
 from ....core import security
 from ....core.config import get_settings
-from ....services.user import user_service
+from ....services.user import UserService
 
 router = APIRouter()
 
 
 @router.post("/token", response_model=schemas.Token)
 def login_for_access_token(
-    db: deps.SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    user_service: UserService = Depends(),
 ):
-    """Autentica o usuário e retorna um token de acesso."""
     user = user_service.authenticate_user(
-        db, username=form_data.username, password=form_data.password
+        username=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(
