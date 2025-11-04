@@ -208,6 +208,6 @@ marimo/_lsp/
 __marimo__/
 # Variáveis de ambiente
 .env.test
-
+.env.e2e
 # Imagens locais
 arquitetura_chatbot_gsantana.png
