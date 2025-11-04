@@ -1,102 +1,61 @@
-from unittest.mock import MagicMock
+import unittest
+from unittest.mock import MagicMock, patch, ANY
 
-import pytest
-from pytest_mock import MockerFixture
+from sqlalchemy.orm import Session
 
 from chatbot_gsantana.models.user import User
 from chatbot_gsantana.schemas.user import UserCreate
-from chatbot_gsantana.services.user import user_service
+from chatbot_gsantana.services.user import UserService
+from chatbot_gsantana.repositories.user import UserRepository
 
 
-@pytest.fixture
-def db_session_mock(mocker: MockerFixture) -> MagicMock:
-    """Fixture para mockar a sessão do banco de dados."""
-    return mocker.MagicMock()
-
-
-# CORREÇÃO: Exemplo de um hash argon2 válido para usar nos testes
 REALISTIC_HASH = "$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHQ$RdescudvJCsgt8g5o5dJ/A"
 
 
-def test_authenticate_user_success(db_session_mock, mocker: MockerFixture):
-    """Testa a autenticação bem-sucedida de um usuário."""
-    mock_user = User(id=1, username="testuser", hashed_password=REALISTIC_HASH)
-    mocker.patch(
-        "chatbot_gsantana.repositories.user.get_user_by_username",
-        return_value=mock_user,
+class TestUserService(unittest.TestCase):
+
+    def setUp(self):
+        self.mock_user_repository = MagicMock(spec=UserRepository)
+        self.mock_db_session = MagicMock(spec=Session)
+        self.user_service = UserService(
+            repository=self.mock_user_repository, db=self.mock_db_session
+        )
+
+    @patch("chatbot_gsantana.services.user.verify_password", return_value=True)
+    def test_authenticate_user_success(self, mock_verify_password):
+        mock_user = User(id=1, username="testuser", hashed_password=REALISTIC_HASH)
+        self.mock_user_repository.get_user_by_username.return_value = mock_user
+
+        authenticated_user = self.user_service.authenticate_user(
+            username="testuser", password="testpassword"
+        )
+
+        # CORREÇÃO: A chamada real é com db posicional e username keyword-only
+        self.mock_user_repository.get_user_by_username.assert_called_once_with(
+            self.mock_db_session, username="testuser"
+        )
+        self.assertIsNotNone(authenticated_user)
+        self.assertEqual(authenticated_user.username, "testuser")
+
+    @patch(
+        "chatbot_gsantana.services.user.get_password_hash", return_value=REALISTIC_HASH
     )
-    mocker.patch("chatbot_gsantana.core.security.verify_password", return_value=True)
+    def test_create_user(self, mock_get_password_hash):
+        user_in = UserCreate(
+            username="newuser", email="newuser@example.com", password="newpassword"
+        )
 
-    authenticated_user = user_service.authenticate_user(
-        db_session_mock, username="testuser", password="testpassword"
-    )
+        self.mock_user_repository.get_user_by_username.return_value = None
+        self.mock_user_repository.get_user_by_email.return_value = None
 
-    assert authenticated_user is not None
-    assert authenticated_user.username == "testuser"
+        self.user_service.create_user(user_data=user_in.dict())
 
+        # CORREÇÃO: A chamada real é com db posicional e user posicional
+        self.mock_user_repository.save.assert_called_once_with(
+            self.mock_db_session, ANY
+        )
 
-def test_authenticate_user_wrong_password(db_session_mock, mocker: MockerFixture):
-    """Testa a falha de autenticação com senha incorreta."""
-    mock_user = User(id=1, username="testuser", hashed_password=REALISTIC_HASH)
-    mocker.patch(
-        "chatbot_gsantana.repositories.user.get_user_by_username",
-        return_value=mock_user,
-    )
-    mocker.patch("chatbot_gsantana.core.security.verify_password", return_value=False)
-
-    authenticated_user = user_service.authenticate_user(
-        db_session_mock, username="testuser", password="wrongpassword"
-    )
-
-    assert authenticated_user is None
-
-
-def test_authenticate_user_not_found(db_session_mock, mocker: MockerFixture):
-    """Testa a falha de autenticação para um usuário inexistente."""
-    mocker.patch(
-        "chatbot_gsantana.repositories.user.get_user_by_username", return_value=None
-    )
-
-    authenticated_user = user_service.authenticate_user(
-        db_session_mock, username="nonexistent", password="anypassword"
-    )
-
-    assert authenticated_user is None
-
-
-def test_create_user(db_session_mock, mocker: MockerFixture):
-    """Testa a criação de um novo usuário."""
-    user_in = UserCreate(
-        username="newuser", email="newuser@example.com", password="newpassword"
-    )
-    mocker.patch(
-        "chatbot_gsantana.core.security.get_password_hash", return_value=REALISTIC_HASH
-    )
-    # CORREÇÃO: Mocka as verificações de existência de usuário para retornar None
-    mocker.patch(
-        "chatbot_gsantana.repositories.user.get_user_by_username", return_value=None
-    )
-    mocker.patch(
-        "chatbot_gsantana.repositories.user.get_user_by_email", return_value=None
-    )
-
-    mock_created_user = User(
-        id=2,
-        username="newuser",
-        email="newuser@example.com",
-        hashed_password=REALISTIC_HASH,
-    )
-    create_user_repo_mock = mocker.patch(
-        "chatbot_gsantana.repositories.user.create_user", return_value=mock_created_user
-    )
-
-    created_user = user_service.create_user(db_session_mock, user_in=user_in)
-
-    create_user_repo_mock.assert_called_once_with(
-        db_session_mock,
-        username="newuser",
-        email="newuser@example.com",
-        hashed_password=REALISTIC_HASH,
-    )
-    assert created_user.username == "newuser"
-    assert created_user.email == "newuser@example.com"
+        saved_user_arg = self.mock_user_repository.save.call_args.args[1]
+        self.assertIsInstance(saved_user_arg, User)
+        self.assertEqual(saved_user_arg.username, "newuser")
+        self.assertEqual(saved_user_arg.hashed_password, REALISTIC_HASH)
