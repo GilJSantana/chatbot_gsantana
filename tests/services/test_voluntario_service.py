@@ -13,7 +13,9 @@ class TestVoluntarioService(unittest.TestCase):
     def setUp(self):
         self.mock_repository = MagicMock(spec=VoluntarioRepository)
         self.mock_db_session = MagicMock(spec=Session)
-        self.service = VoluntarioService(repository=self.mock_repository, db=self.mock_db_session)
+        self.service = VoluntarioService(
+            repository=self.mock_repository, db=self.mock_db_session
+        )
 
     def test_persistir_perfil_voluntario_cria_novo(self):
         """
@@ -26,26 +28,29 @@ class TestVoluntarioService(unittest.TestCase):
             "nome": "João Silva",
             "local": "São Paulo/SP",
             "hobbies": "Leitura, cinema",
-            "conhecimentos": {"python": "avançado"}
+            "conhecimentos": {"python": "avançado"},
         }
 
         # Ação
-        self.service.persistir_perfil_voluntario(
-            session_id=session_id, 
-            **dados_perfil
-        )
+        self.service.persistir_perfil_voluntario(session_id=session_id, **dados_perfil)
 
         # Verificações
         # CORREÇÃO: Usa argumentos posicionais para corresponder à chamada real
-        self.mock_repository.get_by_session_id.assert_called_once_with(self.mock_db_session, session_id)
-        
+        self.mock_repository.get_by_session_id.assert_called_once_with(
+            self.mock_db_session, session_id
+        )
+
         # Verifica se save_or_update foi chamado com um objeto Voluntario
         # CORREÇÃO: Usa argumentos posicionais e ANY para o objeto Voluntario dinâmico
-        self.mock_repository.save_or_update.assert_called_once_with(self.mock_db_session, voluntario=ANY)
-        
+        self.mock_repository.save_or_update.assert_called_once_with(
+            self.mock_db_session, voluntario=ANY
+        )
+
         # Acessa os argumentos nomeados (kwargs) da chamada do mock
-        saved_voluntario: Voluntario = self.mock_repository.save_or_update.call_args.kwargs['voluntario']
-        
+        saved_voluntario: Voluntario = (
+            self.mock_repository.save_or_update.call_args.kwargs["voluntario"]
+        )
+
         self.assertIsInstance(saved_voluntario, Voluntario)
         self.assertEqual(saved_voluntario.session_id, session_id)
         self.assertEqual(saved_voluntario.nome, dados_perfil["nome"])

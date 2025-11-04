@@ -8,11 +8,12 @@ from .core import database, logging_config
 from .core.config import get_settings
 from .api.middleware import LoggingMiddleware
 from .core.database import Base
-from .services.user import UserService # Importa a classe UserService
-from .repositories.user import UserRepository # Importa UserRepository
+from .services.user import UserService  # Importa a classe UserService
+from .repositories.user import UserRepository  # Importa UserRepository
 
 # Engine global para ser usado com SQLite em memória
 engine = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,12 +22,14 @@ async def lifespan(app: FastAPI):
     """
     global engine
     logging_config.configure_logging()
-    
+
     settings = get_settings()
 
     if settings.TEST_MODE:
         if engine is None:
-            engine = create_engine(str(settings.DATABASE_URL), connect_args={"check_same_thread": False})
+            engine = create_engine(
+                str(settings.DATABASE_URL), connect_args={"check_same_thread": False}
+            )
         session_factory = database.get_db_session_factory(existing_engine=engine)
         Base.metadata.create_all(bind=engine)
     else:
@@ -35,7 +38,7 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
 
     app.state.db_session_factory = session_factory
-    
+
     if settings.TEST_ADMIN_USERNAME:
         with session_factory() as db:
             # Instancia UserRepository e UserService manualmente para o lifespan
@@ -45,6 +48,7 @@ async def lifespan(app: FastAPI):
             db.commit()
 
     yield
+
 
 def create_app() -> FastAPI:
     """
@@ -75,5 +79,6 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     return app
+
 
 app = create_app()

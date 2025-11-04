@@ -1,4 +1,3 @@
-import logging
 from unittest.mock import patch, MagicMock
 
 from fastapi.testclient import TestClient
@@ -16,7 +15,7 @@ def test_logging_middleware_success(mock_log: MagicMock, client: TestClient):
 
     # Acessa a última chamada feita ao mock
     last_call = mock_log.info.call_args
-    
+
     # O primeiro argumento posicional é o nome do evento
     event_name = last_call.args[0]
     # Os argumentos de palavra-chave são os metadados

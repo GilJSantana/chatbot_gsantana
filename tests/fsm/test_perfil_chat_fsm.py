@@ -8,49 +8,56 @@ from chatbot_gsantana.services.faq import FaqService
 from chatbot_gsantana.repositories.voluntario import VoluntarioRepository
 from chatbot_gsantana.repositories.faq import FaqRepository
 
+
 @pytest.fixture
 def mock_db_session():
     return MagicMock(spec=Session)
 
+
 @pytest.fixture
 def mock_voluntario_repo():
     return MagicMock(spec=VoluntarioRepository)
+
 
 @pytest.fixture
 def mock_voluntario_service(mock_voluntario_repo, mock_db_session):
     # Mocka a instância do serviço, não a classe
     service = MagicMock(spec=VoluntarioService)
     service.repository = mock_voluntario_repo
-    service.db = mock_db_session # Garante que o serviço tenha acesso ao mock de db
+    service.db = mock_db_session  # Garante que o serviço tenha acesso ao mock de db
     return service
+
 
 @pytest.fixture
 def mock_faq_repo():
     return MagicMock(spec=FaqRepository)
+
 
 @pytest.fixture
 def mock_faq_service(mock_faq_repo, mock_db_session):
     # Mocka a instância do serviço, não a classe
     service = MagicMock(spec=FaqService)
     service.repository = mock_faq_repo
-    service.db = mock_db_session # Garante que o serviço tenha acesso ao mock de db
+    service.db = mock_db_session  # Garante que o serviço tenha acesso ao mock de db
     return service
+
 
 @pytest.fixture
 def fsm(mock_voluntario_service, mock_faq_service, mock_db_session):
-    _user_states.clear() # Limpa estados entre testes
+    _user_states.clear()  # Limpa estados entre testes
     # Passa os mocks para o construtor da FSM
     return PerfilChatFSM(
         voluntario_service=mock_voluntario_service,
         faq_service=mock_faq_service,
-        db=mock_db_session
+        db=mock_db_session,
     )
+
 
 def test_fsm_full_onboarding_flow_and_delegation(
     fsm: PerfilChatFSM,
     mock_db_session: Session,
     mock_voluntario_service: MagicMock,
-    mock_faq_service: MagicMock
+    mock_faq_service: MagicMock,
 ):
     session_id = "test_session_fsm_1"
     # Mocka o retorno do repositório dentro do serviço mockado
@@ -77,7 +84,7 @@ def test_fsm_full_onboarding_flow_and_delegation(
         nome="Carlos",
         local="São Paulo/SP",
         hobbies="Leitura",
-        conhecimentos={'python': 'avançado', 'sql': 'intermediário'}
+        conhecimentos={"python": "avançado", "sql": "intermediário"},
     )
 
     question = "Qual o horário de funcionamento?"
@@ -91,11 +98,12 @@ def test_fsm_full_onboarding_flow_and_delegation(
     )
     assert response == expected_answer
 
+
 def test_fsm_skips_onboarding_if_profile_exists(
     fsm: PerfilChatFSM,
     mock_db_session: Session,
     mock_voluntario_service: MagicMock,
-    mock_faq_service: MagicMock
+    mock_faq_service: MagicMock,
 ):
     session_id = "existing_user_session"
     mock_voluntario_service.repository.get_by_session_id.return_value = MagicMock()

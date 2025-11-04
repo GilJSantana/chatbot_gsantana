@@ -12,10 +12,7 @@ router = APIRouter()
     response_model=schemas.User,
     status_code=status.HTTP_201_CREATED,
 )
-def create_user(
-    user_in: schemas.UserCreate, 
-    user_service: UserService = Depends()
-):
+def create_user(user_in: schemas.UserCreate, user_service: UserService = Depends()):
     user = user_service.create_user(user_data=user_in.dict())
     return user
 

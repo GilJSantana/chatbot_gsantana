@@ -11,6 +11,7 @@ from chatbot_gsantana.models.user import User
 from chatbot_gsantana.repositories.user import UserRepository
 from chatbot_gsantana.services.user import UserService
 
+
 # Define o modo de teste antes de qualquer outra importação de configuração
 @pytest.fixture(scope="session", autouse=True)
 def set_test_mode():
@@ -20,20 +21,26 @@ def set_test_mode():
     os.environ.pop("TEST_MODE", None)
     get_settings.cache_clear()
 
+
 @pytest.fixture(scope="session")
 def test_settings() -> Settings:
     return get_settings()
 
+
 @pytest.fixture(scope="session")
 def test_engine(test_settings: Settings):
-    engine = create_engine(str(test_settings.DATABASE_URL), connect_args={"check_same_thread": False})
+    engine = create_engine(
+        str(test_settings.DATABASE_URL), connect_args={"check_same_thread": False}
+    )
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
 
+
 @pytest.fixture(scope="session")
 def TestingSessionLocal(test_engine):
     return sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+
 
 @pytest.fixture(scope="function")
 def db_session(test_engine, TestingSessionLocal):
@@ -45,6 +52,7 @@ def db_session(test_engine, TestingSessionLocal):
     transaction.rollback()
     connection.close()
 
+
 @pytest.fixture(scope="function")
 def client(db_session):
     def override_get_db():
@@ -55,6 +63,7 @@ def client(db_session):
         yield c
     app.dependency_overrides.clear()
 
+
 @pytest.fixture(scope="function")
 def test_user(db_session) -> User:
     """Cria um usuário de teste para autenticação."""
@@ -63,16 +72,17 @@ def test_user(db_session) -> User:
     user_data = {
         "username": "testuser",
         "password": "testpassword",
-        "email": "test@example.com"
+        "email": "test@example.com",
     }
     return user_service.create_user(user_data=user_data)
+
 
 @pytest.fixture(scope="function")
 def auth_headers(client, test_user: User) -> dict:
     """Obtém um token de autenticação para o usuário de teste."""
     response = client.post(
         app.url_path_for("login_for_access_token"),
-        data={"username": "testuser", "password": "testpassword"}
+        data={"username": "testuser", "password": "testpassword"},
     )
     assert response.status_code == 200, f"Falha ao obter token: {response.text}"
     token = response.json()["access_token"]

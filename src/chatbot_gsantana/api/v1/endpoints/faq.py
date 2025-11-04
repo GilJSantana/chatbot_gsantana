@@ -36,6 +36,7 @@ def create_faq(
 ):
     return faq_service.repository.create_faq(db=faq_service.db, faq=faq_in)
 
+
 @router.delete("/by_question/{question}", response_model=schemas.FAQ)
 def delete_faq_by_question(
     question: str, current_user: deps.CurrentUser, faq_service: FaqService = Depends()

@@ -1,9 +1,9 @@
-import os
 from functools import lru_cache
 from typing import Optional, Union
 
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     """Carrega as variáveis de ambiente para a aplicação."""
@@ -27,24 +27,29 @@ class Settings(BaseSettings):
 
     def __init__(self, **values):
         super().__init__(**values)
-        if not self.TEST_MODE and all([
-            self.POSTGRES_SERVER,
-            self.POSTGRES_USER,
-            self.POSTGRES_PASSWORD,
-            self.POSTGRES_DB
-        ]):
-            self.DATABASE_URL = str(PostgresDsn.build(
-                scheme="postgresql",
-                username=self.POSTGRES_USER,
-                password=self.POSTGRES_PASSWORD,
-                host=self.POSTGRES_SERVER,
-                path=f"{self.POSTGRES_DB}"  # CORREÇÃO: Sem a barra inicial
-            ))
+        if not self.TEST_MODE and all(
+            [
+                self.POSTGRES_SERVER,
+                self.POSTGRES_USER,
+                self.POSTGRES_PASSWORD,
+                self.POSTGRES_DB,
+            ]
+        ):
+            self.DATABASE_URL = str(
+                PostgresDsn.build(
+                    scheme="postgresql",
+                    username=self.POSTGRES_USER,
+                    password=self.POSTGRES_PASSWORD,
+                    host=self.POSTGRES_SERVER,
+                    path=f"{self.POSTGRES_DB}",  # CORREÇÃO: Sem a barra inicial
+                )
+            )
         elif self.TEST_MODE:
             self.DATABASE_URL = "sqlite:///:memory:"
 
     # A configuração do env_file é responsabilidade do Docker Compose
     model_config = SettingsConfigDict(case_sensitive=True)
+
 
 @lru_cache()
 def get_settings() -> Settings:

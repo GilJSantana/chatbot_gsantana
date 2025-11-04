@@ -17,7 +17,9 @@ class TestUserService(unittest.TestCase):
     def setUp(self):
         self.mock_user_repository = MagicMock(spec=UserRepository)
         self.mock_db_session = MagicMock(spec=Session)
-        self.user_service = UserService(repository=self.mock_user_repository, db=self.mock_db_session)
+        self.user_service = UserService(
+            repository=self.mock_user_repository, db=self.mock_db_session
+        )
 
     @patch("chatbot_gsantana.services.user.verify_password", return_value=True)
     def test_authenticate_user_success(self, mock_verify_password):
@@ -29,24 +31,30 @@ class TestUserService(unittest.TestCase):
         )
 
         # CORREÇÃO: A chamada real é com db posicional e username keyword-only
-        self.mock_user_repository.get_user_by_username.assert_called_once_with(self.mock_db_session, username="testuser")
+        self.mock_user_repository.get_user_by_username.assert_called_once_with(
+            self.mock_db_session, username="testuser"
+        )
         self.assertIsNotNone(authenticated_user)
         self.assertEqual(authenticated_user.username, "testuser")
 
-    @patch("chatbot_gsantana.services.user.get_password_hash", return_value=REALISTIC_HASH)
+    @patch(
+        "chatbot_gsantana.services.user.get_password_hash", return_value=REALISTIC_HASH
+    )
     def test_create_user(self, mock_get_password_hash):
         user_in = UserCreate(
             username="newuser", email="newuser@example.com", password="newpassword"
         )
-        
+
         self.mock_user_repository.get_user_by_username.return_value = None
         self.mock_user_repository.get_user_by_email.return_value = None
 
         self.user_service.create_user(user_data=user_in.dict())
 
         # CORREÇÃO: A chamada real é com db posicional e user posicional
-        self.mock_user_repository.save.assert_called_once_with(self.mock_db_session, ANY)
-        
+        self.mock_user_repository.save.assert_called_once_with(
+            self.mock_db_session, ANY
+        )
+
         saved_user_arg = self.mock_user_repository.save.call_args.args[1]
         self.assertIsInstance(saved_user_arg, User)
         self.assertEqual(saved_user_arg.username, "newuser")

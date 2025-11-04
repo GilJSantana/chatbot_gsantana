@@ -11,17 +11,16 @@ logger = structlog.get_logger(__name__)
 
 class VoluntarioService:
 
-    def __init__(self, repository: VoluntarioRepository = Depends(), db: Session = Depends(get_db)):
+    def __init__(
+        self,
+        repository: VoluntarioRepository = Depends(),
+        db: Session = Depends(get_db),
+    ):
         self.repository = repository
         self.db = db
 
     def persistir_perfil_voluntario(
-        self, 
-        session_id: str, 
-        nome: str, 
-        local: str, 
-        hobbies: str, 
-        conhecimentos: dict
+        self, session_id: str, nome: str, local: str, hobbies: str, conhecimentos: dict
     ) -> Voluntario:
         log = logger.bind(session_id=session_id)
         log.info("service.voluntario.persist.start", nome=nome)
@@ -30,10 +29,16 @@ class VoluntarioService:
         perfil = self.repository.get_by_session_id(self.db, session_id)
 
         if not perfil:
-            log.info("service.voluntario.persist.creating", message="Perfil não encontrado, criando novo.")
+            log.info(
+                "service.voluntario.persist.creating",
+                message="Perfil não encontrado, criando novo.",
+            )
             perfil = Voluntario(session_id=session_id)
         else:
-            log.info("service.voluntario.persist.updating", message="Perfil encontrado, atualizando.")
+            log.info(
+                "service.voluntario.persist.updating",
+                message="Perfil encontrado, atualizando.",
+            )
 
         perfil.nome = nome
         perfil.local = local

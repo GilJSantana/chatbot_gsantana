@@ -3,22 +3,27 @@ from playwright.sync_api import Page, expect, APIRequestContext
 
 pytestmark = pytest.mark.e2e
 
+
 def setup_test_faq(api_request_context: APIRequestContext, admin_auth_headers: dict):
     """Helper para garantir que a FAQ de teste exista, usando URLs relativas."""
-    # Tenta deletar primeiro para garantir um estado limpo. 
-    # A ausência do fail_on_status=False é intencional; a chamada prossegue mesmo com 404.
-    api_request_context.delete("/api/v1/faqs/by_question/Olá", headers=admin_auth_headers)
+    # A ausência do fail_on_status=False é intencional;
+    # a chamada prossegue mesmo com 404.
+    api_request_context.delete(
+        "/api/v1/faqs/by_question/Olá", headers=admin_auth_headers
+    )
 
     # Cria a FAQ de teste
     response = api_request_context.post(
         "/api/v1/faqs/",
         headers=admin_auth_headers,
-        data={"question": "Olá", "answer": "Olá! Como posso ajudar?"}
+        data={"question": "Olá", "answer": "Olá! Como posso ajudar?"},
     )
     assert response.ok
 
 
-def test_full_onboarding_and_faq_flow(page: Page, api_request_context: APIRequestContext, admin_auth_headers: dict):
+def test_full_onboarding_and_faq_flow(
+    page: Page, api_request_context: APIRequestContext, admin_auth_headers: dict
+):
     """Testa o fluxo completo, desde o onboarding até a interação com a FAQ."""
     setup_test_faq(api_request_context, admin_auth_headers)
 

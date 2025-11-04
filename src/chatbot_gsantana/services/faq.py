@@ -10,7 +10,9 @@ logger = structlog.get_logger(__name__)
 
 class FaqService:
 
-    def __init__(self, repository: FaqRepository = Depends(), db: Session = Depends(get_db)):
+    def __init__(
+        self, repository: FaqRepository = Depends(), db: Session = Depends(get_db)
+    ):
         self.repository = repository
         self.db = db
 
@@ -19,7 +21,7 @@ class FaqService:
         log.info("service.faq.get_answer.start")
 
         faq = self.repository.find_by_question_exact(self.db, question_text)
-        
+
         if faq:
             log.info("service.faq.get_answer.found", faq_id=faq.id)
             return faq.answer

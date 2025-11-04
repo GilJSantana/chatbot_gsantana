@@ -21,7 +21,7 @@ class FaqRepository:
 
     def find_by_question_exact(self, db: Session, question_text: str) -> FAQ | None:
         return db.query(FAQ).filter(FAQ.question.ilike(question_text)).first()
-    
+
     def find_by_question(self, db: Session, question_text: str) -> FAQ | None:
         return db.query(FAQ).filter(FAQ.question.ilike(f"%{question_text}%")).first()
 
@@ -40,7 +40,7 @@ class FaqRepository:
             db.delete(db_faq)
             db.commit()
         return db_faq
-    
+
     def delete_faq_by_question(self, db: Session, question: str) -> FAQ | None:
         db_faq = self.find_by_question_exact(db, question)
         if db_faq:

@@ -13,7 +13,9 @@ logger = structlog.get_logger(__name__)
 
 class UserService:
 
-    def __init__(self, repository: UserRepository = Depends(), db: Session = Depends(get_db)):
+    def __init__(
+        self, repository: UserRepository = Depends(), db: Session = Depends(get_db)
+    ):
         self.repository = repository
         self.db = db
 
@@ -34,7 +36,9 @@ class UserService:
 
     def get_or_create_admin_user(self, settings: Settings) -> User:
         admin_username = settings.TEST_ADMIN_USERNAME
-        admin_user = self.repository.get_user_by_username(self.db, username=admin_username)
+        admin_user = self.repository.get_user_by_username(
+            self.db, username=admin_username
+        )
         if not admin_user:
             logger.info("service.user.admin.creating", username=admin_username)
             user_data = {

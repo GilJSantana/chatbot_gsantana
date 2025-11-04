@@ -5,6 +5,7 @@ from ....fsm.perfil import PerfilChatFSM
 
 router = APIRouter()
 
+
 @router.post("/", response_model=schemas.ChatResponse)
 def handle_chat_message(
     chat_in: schemas.ChatMessage,
