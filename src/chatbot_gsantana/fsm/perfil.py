@@ -12,6 +12,7 @@ from ..repositories.conversation_state import ConversationStateRepository
 
 logger = structlog.get_logger(__name__)
 
+
 class State(Enum):
     START = auto()
     WAITING_NAME = auto()
@@ -19,6 +20,7 @@ class State(Enum):
     WAITING_LOCATION = auto()
     WAITING_HOBBIES = auto()
     READY_TO_CHAT = auto()
+
 
 def parse_knowledge_to_dict(text: str) -> Dict[str, str]:
     skills = [skill.strip().lower() for skill in text.split(",")]
@@ -28,6 +30,7 @@ def parse_knowledge_to_dict(text: str) -> Dict[str, str]:
         for skill in skills[1:]:
             knowledge_dict[skill] = "intermediário"
     return knowledge_dict
+
 
 class PerfilChatFSM:
     def __init__(
@@ -49,18 +52,29 @@ class PerfilChatFSM:
         if conversation_state:
             return State[conversation_state.state], conversation_state.data
 
-        log.info("fsm.session.new", message="Nova sessão detectada, verificando perfil existente.")
-        perfil_existente = self.voluntario_service.repository.get_by_session_id(self.db, session_id)
-        
+        log.info(
+            "fsm.session.new",
+            message="Nova sessão detectada, verificando perfil existente.",
+        )
+        perfil_existente = self.voluntario_service.repository.get_by_session_id(
+            self.db, session_id
+        )
+
         if perfil_existente:
-            log.info("fsm.onboarding.skip", message="Perfil existente encontrado, pulando para o modo de chat.")
+            log.info(
+                "fsm.onboarding.skip",
+                message="Perfil existente encontrado, pulando para o modo de chat.",
+            )
             new_state = State.READY_TO_CHAT
             new_data = {}
         else:
-            log.info("fsm.onboarding.start", message="Nenhum perfil encontrado, iniciando onboarding.")
+            log.info(
+                "fsm.onboarding.start",
+                message="Nenhum perfil encontrado, iniciando onboarding.",
+            )
             new_state = State.START
             new_data = {}
-        
+
         self.state_repo.save_or_update(self.db, session_id, new_state.name, new_data)
         return new_state, new_data
 
@@ -73,19 +87,30 @@ class PerfilChatFSM:
             log.info("fsm.delegation.faq", message="Delegando para o serviço de FAQ.")
             return self.faq_service.get_answer_for_question(question_text=message)
 
-        return self._handle_onboarding_message(session_id, message, current_state, data, log)
+        return self._handle_onboarding_message(
+            session_id, message, current_state, data, log
+        )
 
-    def _handle_onboarding_message(self, session_id: str, message: str, current_state: State, data: Dict[str, Any], log: structlog.BoundLogger) -> str:
+    def _handle_onboarding_message(
+        self,
+        session_id: str,
+        message: str,
+        current_state: State,
+        data: Dict[str, Any],
+        log: structlog.BoundLogger,
+    ) -> str:
         next_state = None
         response = "Desculpe, não entendi o estado atual da conversa."
 
         if current_state == State.START:
             next_state = State.WAITING_NAME
-            response = "Olá! Sou o assistente de cadastro de voluntários. Para começarmos, qual é o seu nome?"
+            response = ("Olá! Sou o assistente de cadastro de voluntários. "
+                        "Para começarmos, qual é o seu nome?")
         elif current_state == State.WAITING_NAME:
             data["nome"] = message
             next_state = State.WAITING_KNOWLEDGE
-            response = f"Prazer, {message}! Quais são seus conhecimentos? (Ex: Python, SQL, Design)"
+            response = (f"Prazer, {message}! Quais são seus conhecimentos? "
+                        f"(Ex: Python, SQL, Design)")
         elif current_state == State.WAITING_KNOWLEDGE:
             data["conhecimentos"] = parse_knowledge_to_dict(message)
             next_state = State.WAITING_LOCATION
@@ -96,8 +121,11 @@ class PerfilChatFSM:
             response = "Legal! E para descontrair, quais são seus hobbies?"
         elif current_state == State.WAITING_HOBBIES:
             data["hobbies"] = message
-            log.info("fsm.onboarding.persisting", message="Coleta de dados concluída. Persistindo perfil.")
-            
+            log.info(
+                "fsm.onboarding.persisting",
+                message="Coleta de dados concluída. Persistindo perfil.",
+            )
+
             self.voluntario_service.persistir_perfil_voluntario(
                 session_id=session_id,
                 nome=data["nome"],
@@ -105,12 +133,17 @@ class PerfilChatFSM:
                 hobbies=data["hobbies"],
                 conhecimentos=data["conhecimentos"],
             )
-            
+
             next_state = State.READY_TO_CHAT
-            response = "Tudo certo! Seu perfil foi salvo. Agora você pode fazer suas perguntas."
+            response = ("Tudo certo! Seu perfil foi salvo. "
+                        "Agora você pode fazer suas perguntas.")
 
         if next_state:
-            log.info("fsm.state.transition", from_state=current_state.name, to_state=next_state.name)
+            log.info(
+                "fsm.state.transition",
+                from_state=current_state.name,
+                to_state=next_state.name,
+            )
             self.state_repo.save_or_update(self.db, session_id, next_state.name, data)
 
         return response
