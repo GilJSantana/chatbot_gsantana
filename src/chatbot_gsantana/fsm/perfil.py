@@ -104,13 +104,17 @@ class PerfilChatFSM:
 
         if current_state == State.START:
             next_state = State.WAITING_NAME
-            response = ("Olá! Sou o assistente de cadastro de voluntários. "
-                        "Para começarmos, qual é o seu nome?")
+            response = (
+                "Olá! Sou o assistente de cadastro de voluntários. "
+                "Para começarmos, qual é o seu nome?"
+            )
         elif current_state == State.WAITING_NAME:
             data["nome"] = message
             next_state = State.WAITING_KNOWLEDGE
-            response = (f"Prazer, {message}! Quais são seus conhecimentos? "
-                        f"(Ex: Python, SQL, Design)")
+            response = (
+                f"Prazer, {message}! Quais são seus conhecimentos? "
+                f"(Ex: Python, SQL, Design)"
+            )
         elif current_state == State.WAITING_KNOWLEDGE:
             data["conhecimentos"] = parse_knowledge_to_dict(message)
             next_state = State.WAITING_LOCATION
@@ -135,8 +139,10 @@ class PerfilChatFSM:
             )
 
             next_state = State.READY_TO_CHAT
-            response = ("Tudo certo! Seu perfil foi salvo. "
-                        "Agora você pode fazer suas perguntas.")
+            response = (
+                "Tudo certo! Seu perfil foi salvo. "
+                "Agora você pode fazer suas perguntas."
+            )
 
         if next_state:
             log.info(
