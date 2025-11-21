@@ -26,8 +26,19 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: poetry install --no-root
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Run Jest tests (Frontend)
+        run: npm test
 
       - name: Run Black (code formatter)
         run: poetry run black --check src tests
@@ -35,14 +46,14 @@ jobs:
       - name: Run Flake8 (linter)
         run: poetry run flake8 src tests
 
-      - name: Run Unit and Integration tests (excluding E2E)
+      - name: Run Unit and Integration tests (Backend - excluding E2E)
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           PYTHONPATH: src
         run: poetry run pytest -m "not e2e"
 
-     # --- Etapas para Testes E2E ---
-      - name: Create .env.e2e file for Docker Compose
+      # --- Etapas para Testes E2E ---
+      - name: Create .env.e2e file from Secrets
         run: |
           echo "POSTGRES_SERVER=db" >> .env.e2e
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env.e2e
@@ -52,47 +63,28 @@ jobs:
           echo "TEST_ADMIN_EMAIL=${{ secrets.TEST_ADMIN_EMAIL }}" >> .env.e2e
           echo "TEST_ADMIN_PASSWORD=${{ secrets.TEST_ADMIN_PASSWORD }}" >> .env.e2e
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.e2e
-        env:
-          # Define as variáveis de ambiente para o script de shell
-          POSTGRES_DB: chatbot_gsantana_db # Valor padrão, pode ser sobrescrito por secrets
-          POSTGRES_USER: user_gsantana # Valor padrão
-          POSTGRES_PASSWORD: Chatbot_2025! # Valor padrão
-          TEST_ADMIN_USERNAME: admin_e2e # Valor padrão
-          TEST_ADMIN_EMAIL: admin_e2e@test.com # Valor padrão
-          TEST_ADMIN_PASSWORD: strong_test_password # Valor padrão
 
       - name: Build and start Docker Compose (for E2E)
         run: docker compose up -d --build
 
       - name: Wait for API to be ready
-        # Espera até que o serviço 'api' esteja respondendo na porta 8000
         run: |
           echo "Waiting for API to be ready..."
-          for i in $(seq 1 30); do
-            docker compose exec nginx curl -f http://nginx/health-check && echo "API is ready!" && break
+          for i in $(seq 1 60); do
+            if docker compose exec nginx curl -f http://nginx/health-check; then
+              echo "API is ready!"
+              break
+            fi
+            echo "Attempt $i: API not ready yet."
             sleep 2
           done
-        timeout-minutes: 1 # Define um timeout para esta etapa
+        timeout-minutes: 2
 
       - name: Run E2E tests
-        # Executa os testes E2E com a base_url correta
-        run:  docker compose run --rm api pytest -m e2e
+        run: docker compose run --rm api pytest -m e2e
         env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }} # Garante que a SECRET_KEY esteja disponível para o pytest, se necessário
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Tear down Docker Compose
-        if: always() # Garante que o cleanup ocorra mesmo se os testes E2E falharem
+        if: always()
         run: docker compose down -v
-
-      # - name: Build Docker image # Mantenha este passo se for para construir a imagem da API
-      #   run: docker build -t chatbot-gsantana-api:latest .
-
-    # Futuros passos para push da imagem para registry e deploy
-    # - name: Log in to Docker Hub
-    #   uses: docker/login-action@v3
-    #   with:
-    #     username: ${{ secrets.DOCKER_USERNAME }}
-    #   password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # - name: Push Docker image
-    #   run: docker push chatbot-gsantana-api:latest
