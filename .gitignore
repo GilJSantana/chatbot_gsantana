@@ -209,5 +209,11 @@ __marimo__/
 # Variáveis de ambiente
 .env.test
 .env.e2e
+
 # Imagens locais
 arquitetura_chatbot_gsantana.png
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
