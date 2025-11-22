@@ -26,7 +26,8 @@ def test_read_faqs(client: TestClient, auth_headers: dict):
         json={"question": "Qual horário?", "answer": "Das 8h às 18h."},
     )
 
-    response = client.get("/api/v1/faqs/")
+    # CORREÇÃO DEFINITIVA: Adiciona os cabeçalhos de autenticação à chamada GET
+    response = client.get("/api/v1/faqs/", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)

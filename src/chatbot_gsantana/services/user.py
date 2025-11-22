@@ -45,7 +45,13 @@ class UserService:
                 "username": admin_username,
                 "email": settings.TEST_ADMIN_EMAIL,
                 "password": settings.TEST_ADMIN_PASSWORD,
-                "is_superuser": True,
+                "is_admin": True,  # CORREÇÃO: Usa o campo 'is_admin'
             }
             return self.create_user(user_data)
+
+        # Garante que o usuário existente seja um admin
+        if not admin_user.is_admin:
+            admin_user.is_admin = True
+            self.repository.save(self.db, admin_user)
+
         return admin_user
