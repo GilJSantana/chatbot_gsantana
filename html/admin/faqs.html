@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de FAQs - Chatbot LabYes</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Estilos gerais */
+        body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        button { cursor: pointer; border: none; padding: 10px 15px; border-radius: 4px; color: white; }
+        .btn-primary { background-color: #007bff; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-secondary { background-color: #6c757d; }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 2rem; }
+
+        /* Tabela de FAQs */
+        table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; }
+        .actions button { margin-right: 5px; }
+
+        /* Modal para formulário */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .close-button { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        
+        /* Formulário */
+        form label { display: block; margin-top: 1rem; }
+        form input, form textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-actions { margin-top: 1.5rem; text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gerenciamento de FAQs</h1>
+            <button id="logout-button" class="btn-danger">Logout</button>
+        </div>
+
+        <button id="add-faq-button" class="btn-primary">Adicionar Nova FAQ</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pergunta</th>
+                    <th>Resposta</th>
+                    <th class="actions">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="faq-table-body">
+                <!-- Linhas da tabela serão inseridas aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal para Adicionar/Editar FAQ -->
+    <div id="faq-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Adicionar Nova FAQ</h2>
+                <span id="close-modal" class="close-button">&times;</span>
+            </div>
+            <form id="faq-form">
+                <input type="hidden" id="faq-id">
+                <div>
+                    <label for="question">Pergunta:</label>
+                    <textarea id="question" name="question" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label for="answer">Resposta:</label>
+                    <textarea id="answer" name="answer" rows="5" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-button" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/faqs.js"></script>
+</body>
+</html>
