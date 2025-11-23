@@ -8,8 +8,6 @@ from .core import database, logging_config
 from .core.config import get_settings
 from .api.middleware import LoggingMiddleware
 from .core.database import Base
-from .services.user import UserService  # Importa a classe UserService
-from .repositories.user import UserRepository  # Importa UserRepository
 
 # Engine global para ser usado com SQLite em memória
 engine = None
@@ -39,13 +37,9 @@ async def lifespan(app: FastAPI):
 
     app.state.db_session_factory = session_factory
 
-    if settings.TEST_ADMIN_USERNAME:
-        with session_factory() as db:
-            # Instancia UserRepository e UserService manualmente para o lifespan
-            user_repo = UserRepository()
-            user_service = UserService(repository=user_repo, db=db)
-            user_service.get_or_create_admin_user(settings=settings)
-            db.commit()
+    # A lógica de criação automática do admin foi removida.
+    # A criação de administradores agora é feita exclusivamente
+    # através do script 'manage.py'.
 
     yield
 
