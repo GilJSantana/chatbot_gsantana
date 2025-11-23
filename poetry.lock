@@ -630,24 +630,23 @@ all = ["email_validator (>=2.0.0)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)"
 
 [[package]]
 name = "fastapi-cli"
-version = "0.0.13"
+version = "0.0.7"
 description = "Run and manage FastAPI apps from the command line with FastAPI CLI. 🚀"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "fastapi_cli-0.0.13-py3-none-any.whl", hash = "sha256:219b73ccfde7622559cef1d43197da928516acb4f21f2ec69128c4b90057baba"},
-    {file = "fastapi_cli-0.0.13.tar.gz", hash = "sha256:312addf3f57ba7139457cf0d345c03e2170cc5a034057488259c33cd7e494529"},
+    {file = "fastapi_cli-0.0.7-py3-none-any.whl", hash = "sha256:d549368ff584b2804336c61f192d86ddea080c11255f375959627911944804f4"},
+    {file = "fastapi_cli-0.0.7.tar.gz", hash = "sha256:02b3b65956f526412515907a0793c9094abd4bfb5457b389f645b0ea6ba3605e"},
 ]
 
 [package.dependencies]
-rich-toolkit = ">=0.14.8"
-typer = ">=0.15.1"
+rich-toolkit = ">=0.11.1"
+typer = ">=0.12.3"
 uvicorn = {version = ">=0.15.0", extras = ["standard"]}
 
 [package.extras]
-standard = ["fastapi-cloud-cli (>=0.1.1)", "uvicorn[standard] (>=0.15.0)"]
-standard-no-fastapi-cloud-cli = ["uvicorn[standard] (>=0.15.0)"]
+standard = ["uvicorn[standard] (>=0.15.0)"]
 
 [[package]]
 name = "filelock"
@@ -2284,14 +2283,14 @@ telegram = ["requests"]
 
 [[package]]
 name = "typer"
-version = "0.19.2"
+version = "0.12.5"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "typer-0.19.2-py3-none-any.whl", hash = "sha256:755e7e19670ffad8283db353267cb81ef252f595aa6834a0d1ca9312d9326cb9"},
-    {file = "typer-0.19.2.tar.gz", hash = "sha256:9ad824308ded0ad06cc716434705f691d4ee0bfd0fb081839d2e426860e7fdca"},
+    {file = "typer-0.12.5-py3-none-any.whl", hash = "sha256:62fe4e471711b147e3365034133904df3e235698399bc4de2b36c8579298d52b"},
+    {file = "typer-0.12.5.tar.gz", hash = "sha256:f592f089bedcc8ec1b974125d64851029c3b1af145f04aca64d69410f0c9b722"},
 ]
 
 [package.dependencies]

@@ -24,16 +24,12 @@ RUN poetry install --no-root --only main,dev
 # 8. Add the venv to the PATH
 ENV PATH="/app/.venv/bin:$PATH"
 
-# 9. CORREÇÃO: Instala as dependências do sistema e os navegadores com o comando oficial do Playwright
+# 9. Instala os navegadores do Playwright
 RUN playwright install --with-deps
 
-# 10. Copy application code
-COPY ./src /app/src
-COPY ./scripts /app/scripts
-COPY ./tests /app/tests
-COPY pytest.ini /app/pytest.ini
+# 10. CORREÇÃO: Copia todo o contexto do projeto para o diretório de trabalho
+# Isso garantirá que manage.py e outros arquivos da raiz sejam incluídos.
+COPY . .
 
 # 11. Expose port
 EXPOSE 8000
-
-# O CMD foi removido, pois o comando será definido no docker-compose.yml
