@@ -38,81 +38,88 @@ Certifique-se de ter instalado:
 
 ### 1. Configuração do Ambiente
 
-O projeto utiliza um arquivo `.env` para gerenciar variáveis de ambiente. Isso permite que você defina suas próprias configurações de banco de dados e chaves secretas.
+O projeto utiliza um arquivo `.env.e2e` para gerenciar as variáveis de ambiente para o ambiente Docker.
 
 a. **Copie o Arquivo de Exemplo:**
-   Na raiz do projeto, copie o arquivo de exemplo `.env.example` para um novo arquivo chamado `.env`.
+   Na raiz do projeto, copie o arquivo de exemplo `.env.example` para um novo arquivo chamado `.env.e2e`.
    ```sh
-   cp .env.example .env
+   cp .env.example .env.e2e
    ```
 
-b. **Preencha o Arquivo `.env`:**
-   Abra o arquivo `.env` e preencha **todas** as variáveis. Siga as instruções contidas nele para gerar a `SECRET_KEY` e defina os parâmetros do banco de dados conforme sua preferência.
-
-c. **Ignore o Arquivo `.env`:**
-   Garanta que o arquivo `.env` esteja listado no seu `.gitignore` para que seus segredos não sejam enviados para o repositório.
+b. **Preencha o Arquivo `.env.e2e`:**
+   Abra o arquivo `.env.e2e` e preencha **todas** as variáveis. Siga as instruções contidas nele para gerar a `SECRET_KEY` e defina os parâmetros do banco de dados. Adicione também as credenciais para o usuário administrador de teste (`TEST_ADMIN_USERNAME`, `TEST_ADMIN_PASSWORD`, etc.).
 
 ### 2. Construir e Iniciar os Contêineres
 
-Agora, execute o seguinte comando na raiz do projeto. Ele irá construir as imagens, criar um banco de dados limpo e iniciar a aplicação, carregando as variáveis do seu arquivo `.env`.
+Execute o seguinte comando na raiz do projeto. Ele irá construir as imagens, criar as tabelas no banco de dados, criar o usuário administrador inicial e iniciar a aplicação.
 
 ```sh
 docker-compose up --build -d
 ```
 
-- A aplicação estará disponível em `http://localhost:8000`.
-- A documentação interativa (Swagger UI) estará em `http://localhost:8000/docs`.
+- A aplicação estará disponível em `http://localhost`.
+- A interface de administração estará em `http://localhost/admin`.
+- A documentação interativa (Swagger UI) estará em `http://localhost/docs`.
 
 ---
 
-## 🛠️ Primeiros Passos: Criando um Superusuário e Autenticando
+## 🛠️ Gerenciamento de Usuários (CLI)
 
-Para interagir com os endpoints protegidos, você precisa primeiro criar um usuário administrador e obter um token de autenticação.
+O projeto inclui uma ferramenta de linha de comando (`manage.py`) para gerenciar usuários de forma segura, especialmente em ambientes de produção.
 
-### 1. Criar o Superusuário
+**Importante:** Todos os comandos devem ser executados através do `docker-compose run`, que executa o script dentro de um contêiner temporário do serviço `api`, garantindo acesso ao banco de dados.
 
-O projeto inclui um script para criar um usuário administrador de forma interativa.
+### Comandos Disponíveis
 
-a. **Acesse o contêiner da API:**
-   Primeiro, encontre o nome do seu contêiner da API:
-   ```sh
-   docker-compose ps
-   ```
-   (O nome será algo como `chatbot_gsantana-api-1`)
+#### Inicializar o Banco de Dados
+Cria todas as tabelas no banco de dados. Útil para a configuração inicial de um ambiente limpo.
+```sh
+docker-compose run --rm api python manage.py init-db
+```
 
-   Em seguida, acesse o terminal do contêiner:
-   ```sh
-   docker exec -it [NOME_DO_SEU_CONTAINER_API] bash
-   ```
+#### Criar um Usuário Administrador
+Cria um novo usuário com privilégios de administrador. O script solicitará a senha de forma interativa e segura.
+```sh
+docker-compose run --rm api python manage.py create-admin <username> <email>
+```
+**Exemplo:**
+```sh
+docker-compose run --rm api python manage.py create-admin gilmar admin@example.com
+```
 
-b. **Execute o script de criação:**
-   Dentro do contêiner, execute o seguinte comando:
-   ```sh
-   python /app/scripts/create_superuser.py
-   ```
+#### Listar Usuários
+Lista todos os usuários cadastrados no sistema, exibindo seus IDs, nomes de usuário, e-mails e status de administrador.
+```sh
+docker-compose run --rm api python manage.py list-users
+```
 
-c. **Siga as instruções:**
-   O script pedirá seu `nome de usuário`, `email` e `senha` (com confirmação). Preencha com os dados desejados.
+#### Promover um Usuário
+Concede privilégios de administrador a um usuário comum existente.
+```sh
+docker-compose run --rm api python manage.py promote-user <username>
+```
 
-### 2. Autenticar na API via Swagger UI
+#### Rebaixar um Usuário
+Remove os privilégios de administrador de um usuário, tornando-o um usuário comum.
+```sh
+docker-compose run --rm api python manage.py demote-user <username>
+```
 
-a. **Acesse a documentação:**
-   Abra seu navegador e vá para `http://localhost:8000/docs`.
+### Níveis de Permissão
 
-b. **Obtenha o Token de Acesso:**
-   - Encontre a seção **`Authentication`** e expanda o endpoint `POST /api/v1/auth/token`.
-   - Clique em **"Try it out"**.
-   - Preencha os campos `username` e `password` com as credenciais que você acabou de criar.
-   - Clique em **"Execute"**.
-   - Na resposta, copie o valor completo do `access_token`.
+O sistema atualmente define dois níveis de permissão para os usuários:
 
-c. **Autorize o Swagger UI:**
-   - No canto superior direito da página, clique no botão **"Authorize"**.
-   - Na janela que abrir, no campo "Value", cole o token que você copiou, **prefixado com `Bearer ` e um espaço**.
-     - Exemplo: `Bearer eyJhbGciOiJIUzI1Ni...`
-   - Clique em **"Authorize"** e depois em **"Close"**.
+**1. Administrador (`is_admin = True`)**
 
-Agora você está autenticado e pode testar todos os endpoints protegidos da API diretamente pelo Swagger.
+Usuários administradores têm acesso total às funcionalidades de gerenciamento do sistema.
+*   **Gerenciamento de FAQs:** Acesso completo de CRUD (Criar, Ler, Atualizar, Deletar) através da API (`/api/v1/faqs/`) e da interface de administração.
+*   **Acesso à Interface de Admin:** Acesso completo à seção `/admin`.
+
+**2. Usuário Comum (`is_admin = False`)**
+
+Usuários comuns (ou não autenticados) têm acesso apenas às funcionalidades públicas.
+*   **Gerenciamento de FAQs:** **Nenhum acesso**. Todas as requisições para os endpoints de gerenciamento de FAQs serão bloqueadas com um erro `403 Forbidden`.
+*   **Acesso ao Chat:** Podem interagir normalmente com o chatbot.
 
 ### Solução de Problemas
 
@@ -120,12 +127,11 @@ Se você encontrar problemas de autenticação ou de banco de dados, a maneira m
 
 ```sh
 # Pare e apague os contêineres e os volumes de dados
-docker-compose down --volumes
+docker-compose down -v
 
 # Reconstrua as imagens sem usar cache e inicie os serviços
-docker-compose up --build --no-cache -d
+docker-compose up --build -d
 ```
-Depois, repita o passo de criação do superusuário.
 
 ## 🧪 Testes
 
