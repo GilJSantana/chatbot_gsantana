@@ -30,7 +30,6 @@ class TestUserService(unittest.TestCase):
             username="testuser", password="testpassword"
         )
 
-        # CORREÇÃO: A chamada real é com db posicional e username keyword-only
         self.mock_user_repository.get_user_by_username.assert_called_once_with(
             self.mock_db_session, username="testuser"
         )
@@ -46,11 +45,9 @@ class TestUserService(unittest.TestCase):
         )
 
         self.mock_user_repository.get_user_by_username.return_value = None
-        self.mock_user_repository.get_user_by_email.return_value = None
 
         self.user_service.create_user(user_data=user_in.dict())
 
-        # CORREÇÃO: A chamada real é com db posicional e user posicional
         self.mock_user_repository.save.assert_called_once_with(
             self.mock_db_session, ANY
         )

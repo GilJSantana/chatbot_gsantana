@@ -27,9 +27,14 @@ ENV PATH="/app/.venv/bin:$PATH"
 # 9. Instala os navegadores do Playwright
 RUN playwright install --with-deps
 
-# 10. CORREÇÃO: Copia todo o contexto do projeto para o diretório de trabalho
-# Isso garantirá que manage.py e outros arquivos da raiz sejam incluídos.
+# 10. Copia todo o contexto do projeto para o diretório de trabalho
 COPY . .
 
-# 11. Expose port
+# 11. Torna o script de entrypoint executável
+RUN chmod +x /app/entrypoint.sh
+
+# 12. Define o entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# 13. Expose port
 EXPOSE 8000

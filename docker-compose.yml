@@ -1,41 +1,42 @@
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
+  db:
+    image: postgres:16
+    container_name: chatbot_gsantana-db-1
+    env_file:
+      - ./.env.e2e
     volumes:
-      - ./html:/usr/share/nginx/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - api
+      - postgres_data_temp:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build: .
-    # CORREÇÃO: Comando simplificado, pois o uvicorn está no PATH da imagem
-    command: uvicorn src.chatbot_gsantana.main:app --host 0.0.0.0 --port 8000
-    volumes:
-      - ./src:/app/src
-    ports:
-      - "8000:8000"
+    container_name: chatbot_gsantana-api-1
     env_file:
       - ./.env.e2e
     depends_on:
       db:
         condition: service_healthy
+    # O entrypoint é definido no Dockerfile.
+    # O 'command' abaixo é passado como argumento para o entrypoint.sh
+    command: >
+      sh -c "gunicorn -w 4 -k uvicorn.workers.UvicornWorker chatbot_gsantana.main:app --bind 0.0.0.0:8000"
 
-  db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data_temp:/var/lib/postgresql/data/
-    env_file:
-      - ./.env.e2e
+  nginx:
+    image: nginx:latest
+    container_name: chatbot_gsantana-nginx-1
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./html:/usr/share/nginx/html:ro
+    depends_on:
+      - api
 
 volumes:
   postgres_data_temp:
