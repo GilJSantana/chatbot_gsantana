@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -8,6 +10,16 @@ from chatbot_gsantana.core.database import Base, get_db
 from chatbot_gsantana.services.user import UserService
 from chatbot_gsantana.repositories.user import UserRepository
 from chatbot_gsantana.models.user import User
+
+# --- Carregamento Explícito do .env.e2e ---
+print("Carregando variáveis de ambiente do .env.e2e...")
+dotenv_path = os.path.join(os.path.dirname(__file__), "../.env.e2e")
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path=dotenv_path)
+    print("Arquivo .env.e2e carregado com sucesso.")
+else:
+    print("Aviso: Arquivo .env.e2e não encontrado.")
+
 
 # Configuração do banco de dados de teste em memória
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
@@ -49,14 +61,12 @@ def test_user(db_session: Session) -> User:
     """Fixture que cria um usuário de teste no banco de dados."""
     user_repo = UserRepository()
     user_service = UserService(repository=user_repo, db=db_session)
-
     user_data = {
         "username": "testuser",
         "email": "test@example.com",
         "password": "testpassword",
-        "is_admin": True,  # CORREÇÃO: Garante que o usuário de teste seja um admin
+        "is_admin": True,
     }
-
     user = user_service.create_user(user_data=user_data)
     return user
 
