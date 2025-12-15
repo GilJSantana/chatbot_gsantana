@@ -33,9 +33,11 @@ def init_db(args):
     print("✅ Tabelas criadas com sucesso.")
 
 
-def create_admin(args):
-    """Cria um novo usuário administrador."""
-    print(f"Criando administrador '{args.username}'...")
+def create_user(args):
+    """Cria um novo usuário (comum ou administrador)."""
+    is_admin = args.admin
+    user_type = "administrador" if is_admin else "comum"
+    print(f"Criando usuário '{args.username}' como {user_type}...")
 
     password = os.getenv("TEST_ADMIN_PASSWORD")
     if not password:
@@ -51,24 +53,26 @@ def create_admin(args):
     with get_session() as db:
         user_repo = UserRepository()
         user_service = UserService(repository=user_repo, db=db)
-        existing_user = user_service.repository.get_user_by_username(
-            db, username=args.username
-        )
-        if existing_user:
-            print(f">> Usuário '{args.username}' já existe. Nenhuma ação foi tomada.")
+
+        # CORREÇÃO: Verifica se o username ou o email já existem
+        if user_repo.get_user_by_username(db, username=args.username):
+            print(f">> Erro: O usuário '{args.username}' já existe.")
+            return
+        if user_repo.get_user_by_email(db, email=args.email):
+            print(f">> Erro: O email '{args.email}' já está em uso.")
             return
 
         user_data = {
             "username": args.username,
             "email": args.email,
             "password": password,
-            "is_admin": True,
+            "is_admin": is_admin,
         }
         try:
             user_service.create_user(user_data)
-            print(f"✅ Administrador '{args.username}' criado com sucesso!")
+            print(f"✅ Usuário '{args.username}' criado com sucesso como {user_type}!")
         except Exception as e:
-            print(f"❌ Erro ao criar administrador: {e}")
+            print(f"❌ Erro ao criar usuário: {e}")
 
 
 def list_users(args):
@@ -131,15 +135,18 @@ def main():
     )
     parser_init_db.set_defaults(func=init_db)
 
-    # Comando create-admin
-    parser_create = subparsers.add_parser(
-        'create-admin', help='Cria um novo usuário administrador.'
+    # Comando create-user
+    parser_create_user = subparsers.add_parser(
+        'create-user', help='Cria um novo usuário (comum ou administrador).'
     )
-    parser_create.add_argument(
-        'username', type=str, help='Nome de usuário para o novo administrador.'
+    parser_create_user.add_argument(
+        'username', type=str, help='Nome de usuário para o novo usuário.'
     )
-    parser_create.add_argument('email', type=str, help='Email do novo administrador.')
-    parser_create.set_defaults(func=create_admin)
+    parser_create_user.add_argument('email', type=str, help='Email do novo usuário.')
+    parser_create_user.add_argument(
+        '--admin', action='store_true', help='Define o usuário como administrador.'
+    )
+    parser_create_user.set_defaults(func=create_user)
 
     # Comando list-users
     parser_list = subparsers.add_parser('list-users', help='Lista todos os usuários.')
