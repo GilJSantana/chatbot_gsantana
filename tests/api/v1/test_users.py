@@ -31,12 +31,12 @@ def test_create_user(client: TestClient, db_session: Session):
     assert user_in_db.email == user_data["email"]
 
 
-def test_login_for_access_token(client: TestClient, test_user: User):
+def test_login_for_access_token(client: TestClient, admin_user: User):
     """
     Test user login and token generation.
     This is explicitly testing the login endpoint.
     """
-    login_data = {"username": test_user.username, "password": "testpassword"}
+    login_data = {"username": admin_user.username, "password": "testpassword"}
     response = client.post("/api/v1/auth/token", data=login_data)
 
     assert response.status_code == 200
@@ -45,17 +45,17 @@ def test_login_for_access_token(client: TestClient, test_user: User):
     assert token_data["token_type"] == "bearer"
 
 
-def test_read_current_user(client: TestClient, auth_headers: dict):
+def test_read_current_user(client: TestClient, admin_auth_headers: dict):
     """
     Test accessing a protected endpoint to get the current user's data.
     """
     # Assuming you have a protected endpoint to get the current user
-    response = client.get("/api/v1/users/me", headers=auth_headers)
+    response = client.get("/api/v1/users/me", headers=admin_auth_headers)
 
     assert response.status_code == 200
     user_data = response.json()
-    assert user_data["username"] == "testuser"
-    assert user_data["email"] == "test@example.com"
+    assert user_data["username"] == "admin_user"
+    assert user_data["email"] == "admin@test.com"
 
 
 def test_read_current_user_unauthenticated(client: TestClient):
