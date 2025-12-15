@@ -45,7 +45,9 @@ class PerfilChatFSM:
         self.state_repo = state_repo
         self.db = db
 
-    def _get_or_create_state(self, session_id: str) -> (State, Dict[str, Any]):
+    def _get_or_create_state(
+        self, session_id: str
+    ) -> (State | None, Dict[str, Any] | None):
         log = logger.bind(session_id=session_id)
         conversation_state = self.state_repo.get_by_session_id(self.db, session_id)
 
@@ -75,11 +77,24 @@ class PerfilChatFSM:
             new_state = State.START
             new_data = {}
 
-        self.state_repo.save_or_update(self.db, session_id, new_state.name, new_data)
+        try:
+            self.state_repo.save_or_update(
+                self.db, session_id, new_state.name, new_data
+            )
+        except Exception:
+            log.exception(
+                "fsm.state.save.error",
+                message="Erro ao salvar o estado inicial da conversa.",
+            )
+            return None, None
         return new_state, new_data
 
     def handle_message(self, session_id: str, message: str) -> str:
         current_state, data = self._get_or_create_state(session_id)
+
+        if current_state is None:
+            return "Ocorreu um erro ao iniciar sua sessão. Por favor, tente novamente."
+
         log = logger.bind(session_id=session_id, current_state=current_state.name)
         log.info("fsm.message.received", user_message=message)
 
@@ -130,13 +145,24 @@ class PerfilChatFSM:
                 message="Coleta de dados concluída. Persistindo perfil.",
             )
 
-            self.voluntario_service.persistir_perfil_voluntario(
-                session_id=session_id,
-                nome=data["nome"],
-                local=data["local"],
-                hobbies=data["hobbies"],
-                conhecimentos=data["conhecimentos"],
-            )
+            try:
+                self.voluntario_service.persistir_perfil_voluntario(
+                    session_id=session_id,
+                    nome=data["nome"],
+                    local=data["local"],
+                    hobbies=data["hobbies"],
+                    conhecimentos=data["conhecimentos"],
+                )
+            except Exception as e:
+                log.exception(
+                    "fsm.onboarding.persist.error",
+                    message="Erro ao persistir o perfil do voluntário.",
+                    error=str(e),
+                )
+                return (
+                    "Ocorreu um erro ao salvar seu perfil. "
+                    "Por favor, tente novamente em alguns instantes."
+                )
 
             next_state = State.READY_TO_CHAT
             response = (
@@ -150,6 +176,19 @@ class PerfilChatFSM:
                 from_state=current_state.name,
                 to_state=next_state.name,
             )
-            self.state_repo.save_or_update(self.db, session_id, next_state.name, data)
+            try:
+                self.state_repo.save_or_update(
+                    self.db, session_id, next_state.name, data
+                )
+            except Exception as e:
+                log.exception(
+                    "fsm.state.save.error",
+                    message="Erro ao atualizar o estado da conversa.",
+                    error=str(e),
+                )
+                return (
+                    "Ocorreu um erro ao processar sua mensagem. "
+                    "Por favor, tente novamente."
+                )
 
         return response
