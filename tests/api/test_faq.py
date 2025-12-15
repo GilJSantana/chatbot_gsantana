@@ -1,11 +1,11 @@
 from fastapi.testclient import TestClient
 
 
-def test_create_faq(client: TestClient, auth_headers: dict):
+def test_create_faq(client: TestClient, admin_auth_headers: dict):
     """Criação de FAQ com autenticação."""
     response = client.post(
         "/api/v1/faqs/",
-        headers=auth_headers,
+        headers=admin_auth_headers,
         json={
             "question": "Qual o horário de funcionamento?",
             "answer": "Das 8h às 18h.",
@@ -17,17 +17,17 @@ def test_create_faq(client: TestClient, auth_headers: dict):
     assert data["answer"] == "Das 8h às 18h."
 
 
-def test_read_faqs(client: TestClient, auth_headers: dict):
+def test_read_faqs(client: TestClient, admin_auth_headers: dict):
     """Listagem de FAQs após criação."""
     # Cria FAQ de teste
     client.post(
         "/api/v1/faqs/",
-        headers=auth_headers,
+        headers=admin_auth_headers,
         json={"question": "Qual horário?", "answer": "Das 8h às 18h."},
     )
 
     # CORREÇÃO DEFINITIVA: Adiciona os cabeçalhos de autenticação à chamada GET
-    response = client.get("/api/v1/faqs/", headers=auth_headers)
+    response = client.get("/api/v1/faqs/", headers=admin_auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)

@@ -29,22 +29,22 @@ def test_delete_faq_unauthenticated(client: TestClient):
     assert response.json()["detail"] == "Not authenticated"
 
 
-def test_read_faqs_authenticated(client: TestClient, auth_headers: dict):
+def test_read_faqs_authenticated(client: TestClient, admin_auth_headers: dict):
     """
     Testa se a leitura de FAQs funciona com autenticação.
     """
-    response = client.get("/api/v1/faqs/", headers=auth_headers)
+    response = client.get("/api/v1/faqs/", headers=admin_auth_headers)
     assert response.status_code == 200
 
 
 def test_create_faq_authenticated(
-    client: TestClient, db_session: Session, auth_headers: dict
+    client: TestClient, db_session: Session, admin_auth_headers: dict
 ):
     """
     Testa se a criação de FAQ funciona com autenticação.
     """
     faq_data = {"question": "Qual o horário?", "answer": "Das 9h às 18h."}
-    response = client.post("/api/v1/faqs/", json=faq_data, headers=auth_headers)
+    response = client.post("/api/v1/faqs/", json=faq_data, headers=admin_auth_headers)
 
     assert response.status_code == 201
     data = response.json()
@@ -53,19 +53,19 @@ def test_create_faq_authenticated(
     assert "id" in data
 
 
-def test_read_faqs_after_creation(client: TestClient, auth_headers: dict):
+def test_read_faqs_after_creation(client: TestClient, admin_auth_headers: dict):
     """
     Testa a listagem de FAQs após a criação de uma.
     """
     # Cria uma FAQ de teste para garantir que a lista não esteja vazia
     client.post(
         "/api/v1/faqs/",
-        headers=auth_headers,
+        headers=admin_auth_headers,
         json={"question": "Qual horário de funcionamento?", "answer": "Das 8h às 18h."},
     )
 
     # CORREÇÃO DEFINITIVA: Passa os cabeçalhos de autenticação para a chamada GET
-    response = client.get("/api/v1/faqs/", headers=auth_headers)
+    response = client.get("/api/v1/faqs/", headers=admin_auth_headers)
 
     assert response.status_code == 200
     # Garante que a resposta é uma lista e que contém pelo menos um item

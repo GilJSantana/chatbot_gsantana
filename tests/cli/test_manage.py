@@ -83,41 +83,41 @@ def test_create_user_password_mismatch(capsys, monkeypatch):
     assert "As senhas não coincidem" in captured.out
 
 
-def test_create_user_username_already_exists(capsys, monkeypatch, test_user: User):
+def test_create_user_username_already_exists(capsys, monkeypatch, admin_user: User):
     """Testa o cenário onde o nome de usuário já existe."""
     inputs = iter(["password", "password"])
     monkeypatch.setattr("getpass.getpass", lambda prompt: next(inputs))
 
     run_cli_command(
-        monkeypatch, ["create-user", test_user.username, "newemail@test.com"]
+        monkeypatch, ["create-user", admin_user.username, "newemail@test.com"]
     )
 
     captured = capsys.readouterr()
-    assert f">> Erro: O usuário '{test_user.username}' já existe." in captured.out
+    assert f">> Erro: O usuário '{admin_user.username}' já existe." in captured.out
 
 
-def test_create_user_email_already_exists(capsys, monkeypatch, test_user: User):
+def test_create_user_email_already_exists(capsys, monkeypatch, admin_user: User):
     """NOVO TESTE: Testa o cenário onde o email já está em uso."""
     inputs = iter(["password", "password"])
     monkeypatch.setattr("getpass.getpass", lambda prompt: next(inputs))
 
     # Tenta criar um usuário com um NOVO username, mas o MESMO email da fixture
-    run_cli_command(monkeypatch, ["create-user", "newuser_same_email", test_user.email])
+    run_cli_command(monkeypatch, ["create-user", "newuser_same_email", admin_user.email])
 
     captured = capsys.readouterr()
-    assert f">> Erro: O email '{test_user.email}' já está em uso." in captured.out
+    assert f">> Erro: O email '{admin_user.email}' já está em uso." in captured.out
 
 
 # --- Testes para 'list-users' ---
 
 
-def test_list_users(capsys, monkeypatch, test_user: User):
+def test_list_users(capsys, monkeypatch, admin_user: User):
     """Testa se a listagem de usuários funciona corretamente."""
     run_cli_command(monkeypatch, ["list-users"])
 
     captured = capsys.readouterr()
     assert "Listando todos os usuários..." in captured.out
-    assert test_user.username in captured.out
+    assert admin_user.username in captured.out
 
 
 # --- Testes para 'promote-user' e 'demote-user' ---
@@ -145,17 +145,17 @@ def test_promote_user(capsys, monkeypatch, db_session: Session):
     assert user.is_admin is True
 
 
-def test_demote_user(capsys, monkeypatch, db_session: Session, test_user: User):
+def test_demote_user(capsys, monkeypatch, db_session: Session, admin_user: User):
     """Testa o rebaixamento de um administrador para usuário comum."""
-    assert test_user.is_admin is True
+    assert admin_user.is_admin is True
 
-    run_cli_command(monkeypatch, ["demote-user", test_user.username])
+    run_cli_command(monkeypatch, ["demote-user", admin_user.username])
 
     captured = capsys.readouterr()
     assert (
-        f"✅ Usuário '{test_user.username}' rebaixado para usuário comum."
+        f"✅ Usuário '{admin_user.username}' rebaixado para usuário comum."
         in captured.out
     )
 
-    db_session.refresh(test_user)
-    assert test_user.is_admin is False
+    db_session.refresh(admin_user)
+    assert admin_user.is_admin is False
