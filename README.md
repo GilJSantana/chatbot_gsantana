@@ -77,14 +77,18 @@ Cria todas as tabelas no banco de dados. Útil para a configuração inicial de 
 docker-compose run --rm api python manage.py init-db
 ```
 
-#### Criar um Usuário Administrador
-Cria um novo usuário com privilégios de administrador. O script solicitará a senha de forma interativa e segura.
+#### Criar um Usuário
+Cria um novo usuário. Por padrão, cria um usuário comum. Use a flag `--admin` para criar um administrador.
 ```sh
-docker-compose run --rm api python manage.py create-admin <username> <email>
+docker-compose run --rm api python manage.py create-user <username> <email> [--admin]
 ```
-**Exemplo:**
+**Exemplo (Usuário Comum):**
 ```sh
-docker-compose run --rm api python manage.py create-admin gilmar admin@example.com
+docker-compose run --rm api python manage.py create-user joao joao@example.com
+```
+**Exemplo (Administrador):**
+```sh
+docker-compose run --rm api python manage.py create-user gilmar admin@example.com --admin
 ```
 
 #### Listar Usuários
