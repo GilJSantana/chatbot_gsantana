@@ -6,7 +6,10 @@ def test_create_faq_as_admin_succeeds(client: TestClient, admin_auth_headers: di
     Verifica se um administrador pode criar uma nova FAQ.
     Deve retornar 201 Created.
     """
-    faq_data = {"question": "Qual é o horário de funcionamento?", "answer": "Das 9h às 18h."}
+    faq_data = {
+        "question": "Qual é o horário de funcionamento?",
+        "answer": "Das 9h às 18h.",
+    }
     response = client.post("/api/v1/faqs/", json=faq_data, headers=admin_auth_headers)
     assert response.status_code == 201
     data = response.json()
@@ -22,7 +25,9 @@ def test_create_faq_as_common_user_fails(
     Deve retornar 403 Forbidden.
     """
     faq_data = {"question": "Posso trazer meu pet?", "answer": "Não."}
-    response = client.post("/api/v1/faqs/", json=faq_data, headers=common_user_auth_headers)
+    response = client.post(
+        "/api/v1/faqs/", json=faq_data, headers=common_user_auth_headers
+    )
     assert response.status_code == 403
     assert response.json() == {"detail": "The user doesn't have enough privileges"}
 
