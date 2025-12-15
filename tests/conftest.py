@@ -57,27 +57,49 @@ def client(db_session: Session) -> TestClient:
 
 
 @pytest.fixture(scope="function")
-def test_user(db_session: Session) -> User:
-    """Fixture que cria um usuário de teste no banco de dados."""
+def admin_user(db_session: Session) -> User:
+    """Fixture que cria um usuário administrador de teste no banco de dados."""
     user_repo = UserRepository()
     user_service = UserService(repository=user_repo, db=db_session)
     user_data = {
-        "username": "testuser",
-        "email": "test@example.com",
+        "username": "admin_user",
+        "email": "admin@test.com",
         "password": "testpassword",
         "is_admin": True,
     }
     user = user_service.create_user(user_data=user_data)
     return user
 
+@pytest.fixture(scope="function")
+def common_user(db_session: Session) -> User:
+    """Fixture que cria um usuário comum (não-admin) de teste no banco de dados."""
+    user_repo = UserRepository()
+    user_service = UserService(repository=user_repo, db=db_session)
+    user_data = {
+        "username": "common_user",
+        "email": "common@test.com",
+        "password": "testpassword",
+        "is_admin": False,
+    }
+    user = user_service.create_user(user_data=user_data)
+    return user
+
 
 @pytest.fixture(scope="function")
-def auth_headers(client: TestClient, test_user: User) -> dict:
-    """Fixture que obtém um token de autenticação para o usuário de teste."""
+def admin_auth_headers(client: TestClient, admin_user: User) -> dict:
+    """Fixture que obtém um token de autenticação para o usuário administrador."""
     login_data = {
-        "username": test_user.username,
+        "username": admin_user.username,
         "password": "testpassword",
     }
+    response = client.post("/api/v1/auth/token", data=login_data)
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+@pytest.fixture(scope="function")
+def common_user_auth_headers(client: TestClient, common_user: User) -> dict:
+    """Fixture que obtém um token de autenticação para o usuário comum."""
+    login_data = {"username": common_user.username, "password": "testpassword"}
     response = client.post("/api/v1/auth/token", data=login_data)
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
