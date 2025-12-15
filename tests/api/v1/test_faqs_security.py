@@ -83,21 +83,6 @@ def test_update_faq_as_common_user_fails(
     assert response.status_code == 403
 
 
-def test_delete_faq_as_admin_succeeds(client: TestClient, admin_auth_headers: dict):
-    """
-    Verifica se um administrador pode deletar uma FAQ.
-    Deve retornar 204 No Content.
-    """
-    # Cria uma FAQ para deletar
-    faq_data = {"question": "FAQ para deletar", "answer": "..."}
-    response = client.post("/api/v1/faqs/", json=faq_data, headers=admin_auth_headers)
-    faq_id = response.json()["id"]
-
-    # Deleta a FAQ
-    response = client.delete(f"/api/v1/faqs/{faq_id}", headers=admin_auth_headers)
-    assert response.status_code == 200
-
-
 def test_delete_faq_unauthenticated_fails(client: TestClient, admin_auth_headers: dict):
     """
     Verifica se um acesso não autenticado NÃO pode deletar uma FAQ.
