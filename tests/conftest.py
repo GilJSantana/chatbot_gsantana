@@ -70,6 +70,7 @@ def admin_user(db_session: Session) -> User:
     user = user_service.create_user(user_data=user_data)
     return user
 
+
 @pytest.fixture(scope="function")
 def common_user(db_session: Session) -> User:
     """Fixture que cria um usuário comum (não-admin) de teste no banco de dados."""
@@ -95,6 +96,7 @@ def admin_auth_headers(client: TestClient, admin_user: User) -> dict:
     response = client.post("/api/v1/auth/token", data=login_data)
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.fixture(scope="function")
 def common_user_auth_headers(client: TestClient, common_user: User) -> dict:
