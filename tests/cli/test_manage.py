@@ -102,7 +102,9 @@ def test_create_user_email_already_exists(capsys, monkeypatch, admin_user: User)
     monkeypatch.setattr("getpass.getpass", lambda prompt: next(inputs))
 
     # Tenta criar um usuário com um NOVO username, mas o MESMO email da fixture
-    run_cli_command(monkeypatch, ["create-user", "newuser_same_email", admin_user.email])
+    run_cli_command(
+        monkeypatch, ["create-user", "newuser_same_email", admin_user.email]
+    )
 
     captured = capsys.readouterr()
     assert f">> Erro: O email '{admin_user.email}' já está em uso." in captured.out
