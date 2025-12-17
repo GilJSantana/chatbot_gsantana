@@ -1,0 +1,7 @@
+# This file overrides the default docker-compose.yml for CI purposes.
+services:
+  api:
+    build:
+      # Specifies that the 'builder' stage from the Dockerfile should be used.
+      # This ensures that the test files are included in the container for E2E tests.
+      target: builder
