@@ -152,8 +152,8 @@ docker-compose run --rm api poetry run pytest
 * [Decisões de Arquitetura](docs/03-arquitetura.md)
 * [Considerações de Segurança](docs/04-seguranca.md)
 * [Processo de Design (UX/UI)](docs/05-design.md)
-* [Plano de Implantação](docs/06-deploy.md)
-* [Guia de Uso](docs/07-guias-de-uso.md)
+* [Plano de Implantação](docs/07-deploy.md)
+* [Guia de Uso](docs/08-guias-de-uso.md)
 
 ## 🤝 Contribuição
 

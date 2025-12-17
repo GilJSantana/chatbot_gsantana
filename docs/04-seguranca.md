@@ -7,7 +7,7 @@ Este documento descreve as principais preocupações de segurança e as medidas 
 A arquitetura do Chatbot Gsantana, conforme definida no [Modelo C4](02-modelo-c4.md), está exposta a algumas ameaças de segurança típicas para aplicações web e APIs. As principais áreas de preocupação incluem:
 
 * **Injeção de Código Malicioso:** Riscos de injeção de SQL ou outros tipos de comandos via requisições da API.
-* **Acesso Não Autorizado:** Tentativas de acesso aos endpoints de administração (`/api/faq/add`, etc.) por usuários não autorizados.
+* **Acesso Não Autorizado:** Tentativas de acesso à interface de administração por usuários não autorizados.
 * **Validação de Dados de Entrada:** Entradas malformadas ou maliciosas que podem causar erros inesperados ou explorar vulnerabilidades.
 * **Ataques de Negação de Serviço (DoS):** Tentativas de sobrecarregar a API com um grande volume de requisições.
 * **Vulnerabilidades no Frontend:** Riscos como Cross-Site Scripting (XSS) se a saída da API for renderizada sem sanitização no navegador.
@@ -23,8 +23,8 @@ Para mitigar as ameaças identificadas, as seguintes práticas de segurança for
 
 ### 2.2. Controle de Acesso e Autenticação
 
-* **Endpoints de Administração Protegidos:** Os endpoints de administração (adição, edição, exclusão de FAQs) são a principal área de risco. A estratégia de segurança para eles é a implementação de um sistema de autenticação robusto.
-* **Plano de Autenticação:** A solução planejada é o uso de **OAuth2 com Tokens JWT (JSON Web Token)**, um padrão moderno e seguro. O FastAPI possui suporte integrado para OAuth2, o que facilitará a implementação e garantirá que apenas usuários autenticados e autorizados possam acessar esses endpoints.
+* **Interface de Administração Protegida:** A interface de administração, acessível em `/admin/`, é a principal área de risco. O acesso a esta interface é protegido por um sistema de autenticação que requer credenciais de superusuário.
+* **Autenticação Baseada em Sessão:** A interface de administração utiliza um sistema de autenticação baseado em sessão com cookies seguros, gerenciado pelo framework do admin. Isso garante que apenas usuários autenticados possam realizar operações de CRUD nos dados da aplicação.
 
 ### 2.3. Segurança da Comunicação
 
@@ -45,6 +45,6 @@ Para mitigar as ameaças identificadas, as seguintes práticas de segurança for
 
 ## 3. Conclusão
 
-As medidas de segurança adotadas, especialmente a validação automática de dados do FastAPI e o uso de ORM, criam uma base sólida. As próximas etapas críticas são a implementação da autenticação com OAuth2/JWT nos endpoints de administração e a configuração de um pipeline de deploy seguro com Docker e gerenciamento de segredos.
+As medidas de segurança adotadas, incluindo a validação de dados do FastAPI, o uso de ORM e a autenticação na interface de administração, criam uma base sólida para a segurança da aplicação. A manutenção de um pipeline de deploy seguro com Docker e o gerenciamento adequado de segredos são passos contínuos essenciais.
 
 ---

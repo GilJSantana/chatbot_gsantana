@@ -1,4 +1,4 @@
-# 01 - Especificação do Chatbot para Lab-Yes
+# 01 - Especificação do Chatbot Gsantana
 
 ## 1. Introdução
 
@@ -6,7 +6,7 @@ Este documento detalha as especificações funcionais e não-funcionais para o d
 
 ## 2. Problema a Ser Resolvido
 
-Atualmente, o Lab-Yes recebe diversas perguntas repetitivas de visitantes e potenciais voluntários através de e-mail e formulários de contato. Isso demanda tempo da equipe para responder a consultas comuns, que poderiam ser automatizadas.
+Atualmente, o Lab Yes! recebe diversas perguntas repetitivas de visitantes e potenciais voluntários através de e-mail e formulários de contato. Isso demanda tempo da equipe para responder a consultas comuns, que poderiam ser automatizadas.
 
 ## 3. Objetivos do Projeto
 
@@ -30,9 +30,9 @@ O chatbot DEVE:
     * **RF3.1. Widget Flutuante:** O chatbot deve ser um widget flutuante no canto inferior da tela do site.
     * **RF3.2. Histórico de Conversa:** Deve exibir o histórico da conversa na janela do chatbot.
     * **RF3.3. Campo de Entrada:** Deve ter um campo de texto para o usuário digitar mensagens e um botão de envio.
-    * **RF3.4. Botão de Abrir/Fechar:** Deve ter um botão para abrir e fechar a janela do chatbot.
-* **RF4. Gerenciamento de FAQs (Mínimo para MVP):**
-    * **RF4.1. Adição de FAQs via API:** Deve haver um endpoint na API para adicionar novas FAQs (para uso inicial/teste manual).
+    .
+* **RF4. Gerenciamento de FAQs:**
+    * **RF4.1. Interface de Administração:** Deve haver uma interface de administração web para gerenciar (criar, ler, atualizar, apagar) as FAQs.
 
 ## 5. Requisitos Não-Funcionais
 
@@ -43,7 +43,7 @@ O chatbot DEVE:
     * **RNF2.2. Configuração de CORS:** O backend deve ter CORS configurado para permitir requisições apenas do domínio `lab-yes.com` (ou * para desenvolvimento).
     * **RNF2.3. Validação de Entrada:** Todas as entradas de usuário e da API devem ser validadas para prevenir dados maliciosos.
 * **RNF3. Escalabilidade (Considerações para o Futuro):**
-    * **RNF3.1. Preparado para Volume:** A arquitetura deve ser pensada para permitir uma futura migração para um banco de dados mais robusto (PostgreSQL) e para suportar um aumento no número de usuários.
+    * **RNF3.1. Preparado para Volume:** A arquitetura deve ser pensada para suportar um aumento no número de usuários.
     * **RNF3.2. Stateless (Backend):** O backend deve ser o máximo possível stateless para facilitar a escalabilidade horizontal.
 * **RNF4. Manutenibilidade:**
     * **RNF4.1. Código Limpo:** O código deve seguir os padrões de linting e formatação (Black, Flake8).
