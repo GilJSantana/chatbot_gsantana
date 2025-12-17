@@ -1,10 +1,10 @@
-# 📐 Decisões de Arquitetura do Chatbot Lab-Yes
+# 📐 Decisões de Arquitetura do Chatbot Gsantana
 
-Este documento detalha as principais decisões de arquitetura e os princípios que guiaram o desenvolvimento do Chatbot Lab-Yes. Ele serve como um complemento aos [diagramas do Modelo C4](02-modelo-c4.md), explicando o raciocínio por trás das escolhas tecnológicas e estruturais.
+Este documento detalha as principais decisões de arquitetura e os princípios que guiaram o desenvolvimento do Chatbot Gsantana. Ele serve como um complemento aos [diagramas do Modelo C4](02-modelo-c4.md), explicando o raciocínio por trás das escolhas tecnológicas e estruturais.
 
 ## 1. Princípios de Design
 
-O projeto Chatbot Lab-Yes foi guiado pelos seguintes princípios de design:
+O projeto Chatbot Gsantana foi guiado pelos seguintes princípios de design:
 
 * **Simplicidade e Clareza:** Optar por soluções diretas e compreensíveis, evitando complexidade desnecessária.
 * **Modularidade:** Dividir o sistema em componentes e módulos coesos e de baixo acoplamento para facilitar a manutenção e evolução.
@@ -15,7 +15,7 @@ O projeto Chatbot Lab-Yes foi guiado pelos seguintes princípios de design:
 
 ## 2. Visão Geral da Arquitetura
 
-O Chatbot Lab-Yes segue uma arquitetura de microsserviço para a API principal, complementada por um frontend desacoplado. A comunicação é RESTful.
+O Chatbot Gsantana segue uma arquitetura de microsserviço para a API principal, complementada por um frontend desacoplado. A comunicação é RESTful.
 
 * **Backend (API do Chatbot):** Responsável pela lógica de negócio principal, gerenciamento de FAQs e integração com o banco de dados.
 * **Frontend (Aplicação no Navegador):** Interface do usuário que interage com a API e exibe as respostas do chatbot.
@@ -33,6 +33,7 @@ O Chatbot Lab-Yes segue uma arquitetura de microsserviço para a API principal, 
     * **Validação de Dados Nativa:** Utiliza Pydantic para validar automaticamente os dados de entrada e saída, o que reduz a quantidade de código boilerplate e aumenta a segurança e a robustez da API.
     * **Documentação Automática:** Gera documentação interativa da API (Swagger UI e ReDoc) automaticamente a partir do código, garantindo que a documentação esteja sempre atualizada e facilitando os testes.
     * **Moderno e Assíncrono:** Construído sobre ASGI (Asynchronous Server Gateway Interface), o que o torna ideal para aplicações com alta concorrência e operações de I/O, como chamadas a bancos de dados e outras APIs.
+    * **Ecossistema Rico:** Inclui suporte para injeção de dependências e ferramentas que facilitam a criação de interfaces de administração, como a utilizada neste projeto.
 
 ### 3.2. Gerenciamento de Dependências: Poetry
 
@@ -41,9 +42,9 @@ O Chatbot Lab-Yes segue uma arquitetura de microsserviço para a API principal, 
     * **Ambientes Virtuais Integrados:** Facilita a criação e gerenciamento de ambientes isolados.
     * **Ferramenta All-in-One:** Simplifica o fluxo de trabalho de desenvolvimento.
 
-### 3.3. Banco de Dados: SQLite (Inicial) e PostgreSQL (Produção)
+### 3.3. Banco de Dados: SQLite (testes) e PostgreSQL (Produção)
 
-* **Porquê SQLite (para desenvolvimento):**
+* **Porquê SQLite (para testes):**
     * **Simplicidade:** Banco de dados em arquivo único, ideal para prototipagem e testes locais.
     * **Facilidade de Setup:** Não requer um servidor de banco de dados separado.
 * **Porquê PostgreSQL (para produção):**
