@@ -1,4 +1,4 @@
-# 📚 Guias de Uso do Chatbot Gsantana
+# Guias de Uso do Chatbot Gsantana
 
 Este documento serve como um guia prático para interagir com o Chatbot Gsantana, tanto para usuários finais quanto para desenvolvedores e administradores.
 
