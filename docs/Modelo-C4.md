@@ -1,4 +1,4 @@
-# 02 - Modelo C4 da Arquitetura do Chatbot
+# Modelo C4 da Arquitetura do Chatbot
 
 Este documento apresenta a arquitetura do chatbot Gsantana utilizando o Modelo C4, que descreve software em diferentes níveis de abstração: Contexto do Sistema, Contêineres, Componentes e Código.
 
@@ -21,7 +21,7 @@ O diagrama de contexto mostra o sistema que estamos construindo (o Chatbot do Gs
     * `Chatbot Gsantana` **é incorporado em** `Site do Lab-Yes`.
     * `Administrador do Lab-Yes` **gerencia** `Chatbot Gsantana` (adiciona/edita FAQs).
        
-        ![Diagrama de Contexto do Sistema](images/context.png)
+        ![Diagrama de Contexto do Sistema](https://raw.githubusercontent.com/gilunix/chatbot_gsantana/main/docs/images/context.png)
 
 ## 2. Nível 2: Diagrama de Contêineres (Container Diagram)
 
@@ -40,7 +40,7 @@ O diagrama de contêineres mostra a arquitetura de alto nível do sistema, divid
     * `Navegador` (widget) **envia requisições HTTP (API)** para a `API do Chatbot (FastAPI)`.
     * `Administrador do Lab-Yes` **usa** o `Navegador` para acessar a interface de administração servida pela `API do Chatbot (FastAPI)`.
     * `API do Chatbot (FastAPI)` **lê/escreve dados** no `Banco de Dados`.
-        ![Diagrama de Contêineres](images/container.png)
+        ![Diagrama de Contêineres](https://raw.githubusercontent.com/gilunix/chatbot_gsantana/main/docs/images/container.png)
         *(Nota: O diagrama usa Flask como exemplo, mas a implementação atual utiliza FastAPI).*
 
 ## 3. Nível 3: Diagrama de Componentes (Component Diagram - para a API do Chatbot)
@@ -66,5 +66,5 @@ Este nível foca em uma única caixa do diagrama de contêineres (a `API do Chat
     * Os `Repositórios` **interagem com** o `Banco de Dados`.
     * Todos os componentes **escrevem logs** no `Módulo de Logging`.
 
-      ![Diagrama de componentes](images/diagrama.png)
+      ![Diagrama de componentes](https://raw.githubusercontent.com/gilunix/chatbot_gsantana/main/docs/images/diagrama.png)
       *(Nota: O diagrama usa Flask como exemplo, mas a implementação atual utiliza FastAPI e Uvicorn).*

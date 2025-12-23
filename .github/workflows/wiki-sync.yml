@@ -1,0 +1,23 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Necessário para fazer push na wiki
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync docs to Wiki
+        uses: spenserblack/actions-wiki@v0.1
+        with:
+          path: docs
+          token: ${{ secrets.GITHUB_TOKEN }}
