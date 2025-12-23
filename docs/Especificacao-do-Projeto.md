@@ -1,4 +1,4 @@
-# 01 - Especificação do Chatbot Gsantana
+# Especificação do Chatbot Gsantana
 
 ## 1. Introdução
 
