@@ -1,10 +1,10 @@
-# 🛡️ Considerações de Segurança no Chatbot Gsantana
+# Considerações de Segurança no Chatbot Gsantana
 
 Este documento descreve as principais preocupações de segurança e as medidas de mitigação adotadas no projeto do Chatbot Gsantana. A segurança foi considerada desde o design da arquitetura para proteger o sistema e os dados dos usuários contra vulnerabilidades comuns.
 
 ## 1. Análise de Ameaças
 
-A arquitetura do Chatbot Gsantana, conforme definida no [Modelo C4](02-modelo-c4.md), está exposta a algumas ameaças de segurança típicas para aplicações web e APIs. As principais áreas de preocupação incluem:
+A arquitetura do Chatbot Gsantana, conforme definida no [Modelo C4](Modelo-C4), está exposta a algumas ameaças de segurança típicas para aplicações web e APIs. As principais áreas de preocupação incluem:
 
 * **Injeção de Código Malicioso:** Riscos de injeção de SQL ou outros tipos de comandos via requisições da API.
 * **Acesso Não Autorizado:** Tentativas de acesso à interface de administração por usuários não autorizados.

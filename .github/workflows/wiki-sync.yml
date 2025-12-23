@@ -1,0 +1,56 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+  # Permite execução manual pela interface do GitHub
+  workflow_dispatch:
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync to Wiki
+        run: |
+          # Configurações
+          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
+          DOCS_DIR="docs"
+          
+          echo "Iniciando sincronização para: ${{ github.repository }}.wiki.git"
+          
+          # Clona a wiki em uma pasta temporária
+          git clone $WIKI_URL tmp_wiki || { echo "Falha ao clonar a Wiki. Verifique se ela foi inicializada."; exit 1; }
+          
+          # Limpa o conteúdo antigo da wiki (exceto .git)
+          find tmp_wiki -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
+          
+          # Copia o conteúdo novo de docs/ para a pasta da wiki
+          if [ -d "$DOCS_DIR" ]; then
+            cp -r $DOCS_DIR/* tmp_wiki/
+          else
+            echo "Diretório $DOCS_DIR não encontrado!"
+            exit 1
+          fi
+          
+          # Entra na pasta e faz o commit/push
+          cd tmp_wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          
+          if git diff --staged --quiet; then
+            echo "Nenhuma mudança detectada."
+          else
+            git commit -m "chore: sync wiki documentation from docs/ [skip ci]"
+            git push $WIKI_URL
+            echo "Wiki atualizada com sucesso!"
+          fi

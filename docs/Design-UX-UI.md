@@ -1,4 +1,4 @@
-# 🎨 Processo de Design (UX/UI) do Chatbot Gsantana
+# Processo de Design (UX/UI) do Chatbot Gsantana
 
 Este documento descreve o processo de design da interface do Chatbot Gsantana, abordando as decisões de UX (Experiência do Usuário) e UI (Interface do Usuário). O objetivo foi criar uma experiência de chat simples, intuitiva e que se integre de forma harmoniosa com o site.
 
