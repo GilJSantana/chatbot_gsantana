@@ -1,30 +1,34 @@
-# 🚀 Chatbot Gsantana!
+# 🚀 Chatbot Gsantana
 
-Este é o repositório principal do projeto **Chatbot Gjsantana**, um sistema de perguntas e respostas frequentes (FAQ) desenvolvido para auxiliar os visitantes do site do Lab Yes!. O projeto é construído com foco em uma arquitetura robusta e escalável, utilizando tecnologias modernas e as melhores práticas de desenvolvimento.
+[![CI/CD Pipeline](https://github.com/gilunix/chatbot_gsantana/actions/workflows/ci.yml/badge.svg)](https://github.com/gilunix/chatbot_gsantana/actions/workflows/ci.yml)
+[![Sync Wiki](https://github.com/gilunix/chatbot_gsantana/actions/workflows/wiki-sync.yml/badge.svg)](https://github.com/gilunix/chatbot_gsantana/actions/workflows/wiki-sync.yml)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker)](https://github.com/gilunix/chatbot_gsantana/pkgs/container/chatbot_gsantana)
+
+Este é o repositório principal do projeto **Chatbot Gsantana**, um sistema de perguntas e respostas frequentes (FAQ) desenvolvido para auxiliar os visitantes do site do Lab Yes!. O projeto é construído com foco em uma arquitetura robusta e escalável, utilizando tecnologias modernas e as melhores práticas de desenvolvimento.
 
 ## ✨ Visão Geral
 
 O Chatbot Gsantana visa aprimorar a experiência do usuário no site do Lab Yes!, fornecendo respostas rápidas e automatizadas para dúvidas comuns. Ele é projetado como uma API RESTful em Python com um frontend leve em JavaScript que pode ser facilmente integrado a qualquer página web.
 
-## 📐 Arquitetura
+## 📚 Documentação Completa (Wiki)
 
-A arquitetura do projeto segue o **Modelo C4**, descrevendo o sistema em diferentes níveis de abstração para garantir clareza e compreensão:
+Toda a documentação técnica, de arquitetura e guias de uso foi centralizada na **Wiki do GitHub**. Consulte os links abaixo para detalhes:
 
-* **Diagrama de Contexto:** [docs/02-modelo-c4.md#1-nível-1-diagrama-de-contexto-do-sistema-system-context-diagram](docs/02-modelo-c4.md#1-nível-1-diagrama-de-contexto-do-sistema-system-context-diagram)
-* **Diagrama de Contêineres:** [docs/02-modelo-c4.md#2-nível-2-diagrama-de-contêineres-container-diagram](docs/02-modelo-c4.md#2-nível-2-diagrama-de-contêineres-container-diagram)
-* **Diagrama de Componentes:** [docs/02-modelo-c4.md#3-nível-3-diagrama-de-componentes-component-diagram---para-a-api-do-chatbot](docs/02-modelo-c4.md#3-nível-3-diagrama-de-componentes-component-diagram---para-a-api-do-chatbot)
-
-Para detalhes completos e visuais dos diagramas, consulte o documento [Modelo C4 da Arquitetura](docs/02-modelo-c4.md).
+*   **[🏠 Home da Wiki](https://github.com/gilunix/chatbot_gsantana/wiki)**
+*   **[Especificação do Projeto](https://github.com/gilunix/chatbot_gsantana/wiki/Especificacao-do-Projeto)**
+*   **[Arquitetura do Sistema](https://github.com/gilunix/chatbot_gsantana/wiki/Arquitetura-do-Sistema)**
+*   **[Modelo C4](https://github.com/gilunix/chatbot_gsantana/wiki/Modelo-C4)**
+*   **[Guias de Uso](https://github.com/gilunix/chatbot_gsantana/wiki/Guias-de-Uso)**
+*   **[Interface Administrativa](https://github.com/gilunix/chatbot_gsantana/wiki/Interface-Administrativa)**
 
 ## 🚀 Tecnologias Utilizadas
 
-* **Backend:** Python 🐍, FastAPI, Uvicorn
-* **Banco de Dados:** PostgreSQL 🐘
-* **Containerização:** Docker 🐳, Docker Compose
-* **Frontend:** JavaScript, HTML, CSS (interface minimalista do chatbot)
-* **Gerenciamento de Dependências:** Poetry
-* **Versionamento:** Git
-* **Documentação:** Markdown, Modelo C4
+*   **Backend:** Python 🐍, FastAPI, Uvicorn
+*   **Banco de Dados:** PostgreSQL 🐘
+*   **Containerização:** Docker 🐳, Docker Compose
+*   **Frontend:** JavaScript, HTML, CSS (interface minimalista do chatbot)
+*   **CI/CD:** GitHub Actions, GitHub Container Registry (GHCR)
+*   **Gerenciamento de Dependências:** Poetry
 
 ## 📦 Rodando o Projeto com Docker
 
@@ -33,8 +37,8 @@ A maneira recomendada para rodar o projeto localmente é utilizando Docker, que 
 ### Pré-requisitos
 
 Certifique-se de ter instalado:
-* [Docker](https://docs.docker.com/get-docker/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
+*   [Docker](https://docs.docker.com/get-docker/)
+*   [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### 1. Configuração do Ambiente
 
@@ -57,103 +61,48 @@ Execute o seguinte comando na raiz do projeto. Ele irá construir as imagens, cr
 docker-compose up --build -d
 ```
 
-- A aplicação estará disponível em `http://localhost`.
-- A interface de administração estará em `http://localhost/admin`.
-- A documentação interativa (Swagger UI) estará em `http://localhost/docs`.
+-   A aplicação estará disponível em `http://localhost`.
+-   A interface de administração estará em `http://localhost/admin`.
+-   A documentação interativa (Swagger UI) estará em `http://localhost/docs`.
 
 ---
 
 ## 🛠️ Gerenciamento de Usuários (CLI)
 
-O projeto inclui uma ferramenta de linha de comando (`manage.py`) para gerenciar usuários de forma segura, especialmente em ambientes de produção.
+O projeto inclui uma ferramenta de linha de comando (`manage.py`) para gerenciar usuários de forma segura.
 
-**Importante:** Todos os comandos devem ser executados através do `docker-compose run`, que executa o script dentro de um contêiner temporário do serviço `api`, garantindo acesso ao banco de dados.
+**Importante:** Todos os comandos devem ser executados através do `docker-compose run`.
 
 ### Comandos Disponíveis
 
 #### Inicializar o Banco de Dados
-Cria todas as tabelas no banco de dados. Útil para a configuração inicial de um ambiente limpo.
 ```sh
 docker-compose run --rm api python manage.py init-db
 ```
 
 #### Criar um Usuário
-Cria um novo usuário. Por padrão, cria um usuário comum. Use a flag `--admin` para criar um administrador.
 ```sh
 docker-compose run --rm api python manage.py create-user <username> <email> [--admin]
 ```
-**Exemplo (Usuário Comum):**
-```sh
-docker-compose run --rm api python manage.py create-user joao joao@example.com
-```
-**Exemplo (Administrador):**
-```sh
-docker-compose run --rm api python manage.py create-user gilmar admin@example.com --admin
-```
 
 #### Listar Usuários
-Lista todos os usuários cadastrados no sistema, exibindo seus IDs, nomes de usuário, e-mails e status de administrador.
 ```sh
 docker-compose run --rm api python manage.py list-users
 ```
 
-#### Promover um Usuário
-Concede privilégios de administrador a um usuário comum existente.
+#### Promover/Rebaixar Usuário
 ```sh
 docker-compose run --rm api python manage.py promote-user <username>
-```
-
-#### Rebaixar um Usuário
-Remove os privilégios de administrador de um usuário, tornando-o um usuário comum.
-```sh
 docker-compose run --rm api python manage.py demote-user <username>
-```
-
-### Níveis de Permissão
-
-O sistema atualmente define dois níveis de permissão para os usuários:
-
-**1. Administrador (`is_admin = True`)**
-
-Usuários administradores têm acesso total às funcionalidades de gerenciamento do sistema.
-*   **Gerenciamento de FAQs:** Acesso completo de CRUD (Criar, Ler, Atualizar, Deletar) através da API (`/api/v1/faqs/`) e da interface de administração.
-*   **Acesso à Interface de Admin:** Acesso completo à seção `/admin`.
-
-**2. Usuário Comum (`is_admin = False`)**
-
-Usuários comuns (ou não autenticados) têm acesso apenas às funcionalidades públicas.
-*   **Gerenciamento de FAQs:** **Nenhum acesso**. Todas as requisições para os endpoints de gerenciamento de FAQs serão bloqueadas com um erro `403 Forbidden`.
-*   **Acesso ao Chat:** Podem interagir normalmente com o chatbot.
-
-### Solução de Problemas
-
-Se você encontrar problemas de autenticação ou de banco de dados, a maneira mais segura de recomeçar é apagar completamente o ambiente Docker e reconstruí-lo. Isso garante um banco de dados 100% limpo.
-
-```sh
-# Pare e apague os contêineres e os volumes de dados
-docker-compose down -v
-
-# Reconstrua as imagens sem usar cache e inicie os serviços
-docker-compose up --build -d
 ```
 
 ## 🧪 Testes
 
-Para executar os testes automatizados do projeto, utilize o `docker-compose` para rodar os testes no ambiente containerizado:
+Para executar os testes automatizados do projeto:
 
 ```bash
 docker-compose run --rm api poetry run pytest
 ```
-
-## 📄 Documentação Adicional
-
-* [Especificação](docs/01-especificacao.md)
-* [C4](docs/02-modelo-c4.md)
-* [Decisões de Arquitetura](docs/03-arquitetura.md)
-* [Considerações de Segurança](docs/04-seguranca.md)
-* [Processo de Design (UX/UI)](docs/05-design.md)
-* [Plano de Implantação](docs/07-deploy.md)
-* [Guia de Uso](docs/08-guias-de-uso.md)
 
 ## 🤝 Contribuição
 
@@ -165,10 +114,9 @@ Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
 4.  Envie suas alterações para a nova branch (`git push origin feature/minha-nova-feature`).
 5.  Abra um Pull Request no repositório original.
 
-
 ## 📞 Contato
 
-* **Linkedin:** [Gilmar](https://www.linkedin.com/in/gilmarjs/)
-* **Lab Yes!:** [https://Lab Yes!.com](https://lab-yes.com)
+*   **Linkedin:** [Gilmar](https://www.linkedin.com/in/gilmarjs/)
+*   **Lab Yes!:** [https://lab-yes.com](https://lab-yes.com)
 
 ---
