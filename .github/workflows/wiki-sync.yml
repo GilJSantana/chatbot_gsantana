@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'docs/**'
-  # Permite execução manual pela interface do GitHub
   workflow_dispatch:
 
 jobs:
@@ -24,17 +23,35 @@ jobs:
           WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
           DOCS_DIR="docs"
           
-          echo "Iniciando sincronização para: ${{ github.repository }}.wiki.git"
+          echo "Iniciando sincronização..."
           
-          # Clona a wiki em uma pasta temporária
-          git clone $WIKI_URL tmp_wiki || { echo "Falha ao clonar a Wiki. Verifique se ela foi inicializada."; exit 1; }
+          # Clona a wiki
+          git clone $WIKI_URL tmp_wiki
+          
+          # Verifica se clonou
+          if [ ! -d "tmp_wiki" ]; then
+            echo "ERRO: Pasta tmp_wiki não foi criada após o clone."
+            exit 1
+          fi
+          
+          echo "Conteúdo inicial da Wiki:"
+          ls -la tmp_wiki
           
           # Limpa o conteúdo antigo da wiki (exceto .git)
-          find tmp_wiki -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
+          # Entra na pasta para evitar deletar a pasta pai por engano
+          cd tmp_wiki
+          # Apaga tudo exceto .git
+          find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
+          cd ..
           
-          # Copia o conteúdo novo de docs/ para a pasta da wiki
+          echo "Conteúdo da Wiki após limpeza:"
+          ls -la tmp_wiki
+          
+          # Copia o conteúdo novo
           if [ -d "$DOCS_DIR" ]; then
-            cp -r $DOCS_DIR/* tmp_wiki/
+            echo "Copiando arquivos de $DOCS_DIR para tmp_wiki..."
+            # Usa cp -rT se disponível ou cp -r com /*
+            cp -r $DOCS_DIR/. tmp_wiki/
           else
             echo "Diretório $DOCS_DIR não encontrado!"
             exit 1
