@@ -1,4 +1,4 @@
-# 🚀 Plano de Implantação (Deploy) do Chatbot Gsantana
+# Guia de Implantação (Deploy) do Chatbot Gsantana
 
 Este documento descreve o processo de implantação do Chatbot Gsantana, com foco em uma estratégia moderna e automatizada usando Docker e CI/CD, alinhada com as melhores práticas de engenharia de software.
 
@@ -60,4 +60,3 @@ Em caso de falha na implantação, o rollback pode ser feito de duas maneiras:
 *   Acessar a URL da aplicação e verificar se o frontend carrega.
 *   Interagir com o chatbot para confirmar que a API está respondendo corretamente.
 *   Verificar os logs dos contêineres em execução com `docker-compose logs` para garantir que não há erros.
----
