@@ -1,4 +1,4 @@
-# Documentação da Interface de Administração de FAQs
+# Interface de Administração de FAQs
 
 Esta documentação descreve a interface de administração para gerenciar as Perguntas Frequentes (FAQs) do chatbot.
 

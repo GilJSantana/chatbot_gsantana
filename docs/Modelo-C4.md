@@ -1,4 +1,4 @@
-# 02 - Modelo C4 da Arquitetura do Chatbot
+# Modelo C4 da Arquitetura do Chatbot
 
 Este documento apresenta a arquitetura do chatbot Gsantana utilizando o Modelo C4, que descreve software em diferentes níveis de abstração: Contexto do Sistema, Contêineres, Componentes e Código.
 
