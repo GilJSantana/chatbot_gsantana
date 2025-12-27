@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'docs/**'
-  # Permite execução manual pela interface do GitHub
   workflow_dispatch:
 
 jobs:
@@ -24,23 +23,37 @@ jobs:
           WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
           DOCS_DIR="docs"
           
-          echo "Iniciando sincronização para: ${{ github.repository }}.wiki.git"
+          echo "Iniciando sincronização..."
           
-          # Clona a wiki em uma pasta temporária
-          git clone $WIKI_URL tmp_wiki || { echo "Falha ao clonar a Wiki. Verifique se ela foi inicializada."; exit 1; }
+          # Clona a wiki
+          git clone $WIKI_URL tmp_wiki
           
-          # Limpa o conteúdo antigo da wiki (exceto .git)
-          find tmp_wiki -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
-          
-          # Copia o conteúdo novo de docs/ para a pasta da wiki
-          if [ -d "$DOCS_DIR" ]; then
-            cp -r $DOCS_DIR/* tmp_wiki/
-          else
-            echo "Diretório $DOCS_DIR não encontrado!"
+          # Verifica explicitamente se a pasta foi criada
+          if [ ! -d "tmp_wiki" ]; then
+            echo "ERRO CRÍTICO: O git clone falhou ou a pasta tmp_wiki não foi criada."
+            ls -la
             exit 1
           fi
           
-          # Entra na pasta e faz o commit/push
+          echo "Pasta tmp_wiki criada com sucesso. Conteúdo:"
+          ls -la tmp_wiki
+          
+          # Limpeza segura: entra na pasta antes de apagar
+          cd tmp_wiki
+          echo "Limpando arquivos antigos..."
+          find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
+          cd ..
+          
+          # Cópia segura
+          if [ -d "$DOCS_DIR" ]; then
+            echo "Copiando novos arquivos..."
+            cp -r $DOCS_DIR/. tmp_wiki/
+          else
+            echo "ERRO: Diretório de origem $DOCS_DIR não encontrado!"
+            exit 1
+          fi
+          
+          # Commit e Push
           cd tmp_wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -48,7 +61,7 @@ jobs:
           git add .
           
           if git diff --staged --quiet; then
-            echo "Nenhuma mudança detectada."
+            echo "Nenhuma mudança detectada para commitar."
           else
             git commit -m "chore: sync wiki documentation from docs/ [skip ci]"
             git push $WIKI_URL
