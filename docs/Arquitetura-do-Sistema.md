@@ -1,6 +1,6 @@
-# 📐 Decisões de Arquitetura do Chatbot Gsantana
+# Decisões de Arquitetura do Chatbot Gsantana
 
-Este documento detalha as principais decisões de arquitetura e os princípios que guiaram o desenvolvimento do Chatbot Gsantana. Ele serve como um complemento aos [diagramas do Modelo C4](02-modelo-c4.md), explicando o raciocínio por trás das escolhas tecnológicas e estruturais.
+Este documento detalha as principais decisões de arquitetura e os princípios que guiaram o desenvolvimento do Chatbot Gsantana. Ele serve como um complemento aos [diagramas do Modelo C4](Modelo-C4), explicando o raciocínio por trás das escolhas tecnológicas e estruturais.
 
 ## 1. Princípios de Design
 
