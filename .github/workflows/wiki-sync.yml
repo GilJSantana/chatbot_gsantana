@@ -20,77 +20,39 @@ jobs:
       - name: Sync to Wiki
         run: |
           # Configurações
-          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/GilJSantana/chatbot_gsantana.wiki.git"
+          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
           DOCS_DIR="docs"
           WIKI_DIR="tmp_wiki"
           
-          echo "Iniciando sincronização..."
+          echo "Iniciando sincronização para a Wiki..."
           
-<<<<<<< Updated upstream
-          # Clona a wiki
-          git clone $WIKI_URL tmp_wiki
-          
-          # Verifica explicitamente se a pasta foi criada
-          if [ ! -d "tmp_wiki" ]; then
-            echo "ERRO CRÍTICO: O git clone falhou ou a pasta tmp_wiki não foi criada."
-            ls -la
-            exit 1
-          fi
-          
-          echo "Pasta tmp_wiki criada com sucesso. Conteúdo:"
-          ls -la tmp_wiki
-          
-          # Limpeza segura: entra na pasta antes de apagar
-          cd tmp_wiki
-          echo "Limpando arquivos antigos..."
-          find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -exec rm -rf {} +
-          cd ..
-          
-          # Cópia segura
-          if [ -d "$DOCS_DIR" ]; then
-            echo "Copiando novos arquivos..."
-            cp -r $DOCS_DIR/. tmp_wiki/
-          else
-            echo "ERRO: Diretório de origem $DOCS_DIR não encontrado!"
-            exit 1
-          fi
-          
-          # Commit e Push
-          cd tmp_wiki
-=======
-          # 1. Clona a wiki
+          # 1. Clona a wiki em um diretório temporário
           git clone $WIKI_URL $WIKI_DIR
           
-          # 2. Sincroniza os arquivos usando rsync
-          # rsync é mais seguro e eficiente que 'rm' e 'cp'
-          # --delete: apaga arquivos no destino que não existem na origem
-          # -a: modo de arquivamento (preserva permissões, etc.)
-          # --exclude='.git': não toca na pasta .git
+          # 2. Sincroniza os arquivos da pasta docs/ para a pasta da wiki
+          #    -a: modo de arquivamento (recursivo, preserva links, etc.)
+          #    -v: verboso, para vermos os arquivos sendo copiados
+          #    --delete: apaga arquivos no destino que não existem na origem
+          #    --exclude='.git': nunca toca na pasta .git
+          echo "Sincronizando arquivos com rsync..."
           rsync -av --delete --exclude='.git' $DOCS_DIR/ $WIKI_DIR/
           
-          # 3. Entra na pasta e faz o commit/push
+          # 3. Entra na pasta da wiki e faz o commit/push
           cd $WIKI_DIR
->>>>>>> Stashed changes
+          
+          # Configura o autor do commit
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Se não houver mudanças, o 'git add' não fará nada e o 'git commit' falhará.
-          # O '|| true' garante que o workflow não pare se não houver commit.
+          # Adiciona todas as mudanças
           git add .
-          git commit -m "chore: sync wiki documentation from docs/ [skip ci]" || true
           
-<<<<<<< Updated upstream
+          # Faz o commit apenas se houver mudanças
           if git diff --staged --quiet; then
-            echo "Nenhuma mudança detectada para commitar."
+            echo "Nenhuma mudança na documentação detectada."
           else
-            git commit -m "chore: sync wiki documentation from docs/ [skip ci]"
-=======
-          # Só faz push se houver algo para enviar
-          # Compara o HEAD local com o remoto. Se forem diferentes, faz push.
-          if [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ]; then
->>>>>>> Stashed changes
-            git push $WIKI_URL
+            git commit -m "docs: sync from main repository [skip ci]"
+            echo "Novas mudanças commitadas. Realizando push..."
+            git push
             echo "Wiki atualizada com sucesso!"
-          else
-            echo "Nenhuma mudança para enviar para a Wiki."
           fi
